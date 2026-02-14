@@ -19,10 +19,11 @@ export async function GET(request: NextRequest) {
 
     const supabase = createServiceRoleClient();
 
-    // Get all messages in period
+    // Get user messages in period (exclude assistant responses to avoid double-counting)
     const { data: messages } = await supabase
       .from('messages')
       .select('id, role, created_at, conversation_id')
+      .eq('role', 'user')
       .gte('created_at', sinceISO)
       .order('created_at', { ascending: true });
 

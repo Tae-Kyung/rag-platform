@@ -55,7 +55,7 @@ export async function POST(
       return errorResponse('channel and config are required', 400);
     }
 
-    if (!['telegram', 'kakao', 'wechat', 'api'].includes(channel)) {
+    if (!['telegram', 'kakao', 'whatsapp', 'wechat', 'api'].includes(channel)) {
       return errorResponse('Invalid channel type', 400);
     }
 
@@ -134,6 +134,48 @@ export async function POST(
             app_key: appKey,
             webhook_url: webhookUrl,
           },
+          is_active: true,
+        })
+        .select()
+        .single();
+
+      if (error) return errorResponse(error.message, 500);
+      return successResponse(created, 201);
+    }
+
+    // For WhatsApp: validate access_token and phone_number_id, generate verify_token
+    if (channel === 'whatsapp') {
+      const accessToken = config.access_token;
+      const phoneNumberId = config.phone_number_id;
+      const appSecret = config.app_secret; // optional
+
+      if (!accessToken || typeof accessToken !== 'string') {
+        return errorResponse('access_token is required for WhatsApp', 400);
+      }
+      if (!phoneNumberId || typeof phoneNumberId !== 'string') {
+        return errorResponse('phone_number_id is required for WhatsApp', 400);
+      }
+
+      const verifyToken = crypto.randomUUID();
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const webhookUrl = `${appUrl}/api/webhooks/whatsapp/${botId}`;
+
+      const configData: Record<string, string> = {
+        access_token: accessToken,
+        phone_number_id: phoneNumberId,
+        verify_token: verifyToken,
+        webhook_url: webhookUrl,
+      };
+      if (appSecret && typeof appSecret === 'string') {
+        configData.app_secret = appSecret;
+      }
+
+      const { data: created, error } = await supabase
+        .from('channel_configs')
+        .insert({
+          bot_id: botId,
+          channel: 'whatsapp',
+          config: configData,
           is_active: true,
         })
         .select()

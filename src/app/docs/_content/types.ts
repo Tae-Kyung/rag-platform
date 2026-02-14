@@ -61,6 +61,9 @@ export interface UserGuideContent {
     kakaoOpenBuilderTitle: string;
     kakaoOpenBuilderSteps: string[];
     kakaoNote: string;
+    whatsappTitle: string;
+    whatsappSteps: string[];
+    whatsappNote: string;
   };
   conversations: {
     title: string;

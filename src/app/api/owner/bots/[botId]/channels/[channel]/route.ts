@@ -129,6 +129,15 @@ export async function DELETE(
         .eq('bot_id', botId);
     }
 
+    // For WhatsApp: clean up user mappings
+    if (channel === 'whatsapp') {
+      const serviceClient = createServiceRoleClient();
+      await serviceClient
+        .from('whatsapp_user_mappings')
+        .delete()
+        .eq('bot_id', botId);
+    }
+
     const { error } = await supabase
       .from('channel_configs')
       .delete()

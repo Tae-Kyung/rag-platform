@@ -46,5 +46,16 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Auth pages: redirect to dashboard if already authenticated
+  if (
+    (pathname === '/login' || pathname === '/signup') &&
+    user
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/dashboard';
+    url.search = '';
+    return NextResponse.redirect(url);
+  }
+
   return supabaseResponse;
 }

@@ -31,13 +31,16 @@ function LoginForm() {
       return;
     }
 
-    router.push(redirect);
-    router.refresh();
+    // Use window.location for a full page navigation so the middleware
+    // picks up the newly-set auth cookies on the very first server request.
+    // router.push() does a client-side navigation where the middleware may
+    // not yet see the cookie and redirect back to /login.
+    window.location.href = redirect;
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-      <h2 className="mb-6 text-center text-xl font-semibold text-gray-900">
+    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-8 shadow-sm">
+      <h2 className="mb-6 text-center text-xl font-semibold text-gray-900 dark:text-white">
         Log in to your account
       </h2>
 
@@ -45,7 +48,7 @@ function LoginForm() {
         <div>
           <label
             htmlFor="email"
-            className="mb-1 block text-sm font-medium text-gray-700"
+            className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             Email
           </label>
@@ -55,7 +58,7 @@ function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             placeholder="you@example.com"
           />
         </div>
@@ -63,7 +66,7 @@ function LoginForm() {
         <div>
           <label
             htmlFor="password"
-            className="mb-1 block text-sm font-medium text-gray-700"
+            className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             Password
           </label>
@@ -74,7 +77,7 @@ function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={6}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             placeholder="••••••••"
           />
         </div>
@@ -95,11 +98,11 @@ function LoginForm() {
       <div className="mt-4 flex items-center justify-between text-sm">
         <Link
           href="/reset-password"
-          className="text-blue-600 hover:text-blue-700"
+          className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
         >
           Forgot password?
         </Link>
-        <Link href="/signup" className="text-blue-600 hover:text-blue-700">
+        <Link href="/signup" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
           Sign up
         </Link>
       </div>

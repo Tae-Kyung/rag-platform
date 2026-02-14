@@ -104,6 +104,15 @@ const content: UserGuideContent = {
       '카카오톡에서 채널을 친구 추가한 뒤 메시지를 전송하여 정상 동작을 테스트합니다.',
     ],
     kakaoNote: '<strong>참고:</strong> 카카오톡 채널은 Pro 또는 Enterprise 플랜에서 사용할 수 있습니다. 오픈빌더 스킬은 동기식 응답 기준 <strong>5초 타임아웃</strong> 제한이 있으며, simpleText 응답은 최대 <strong>1,000자</strong>까지 지원됩니다.',
+    whatsappTitle: 'WhatsApp 연결',
+    whatsappSteps: [
+      '<metadev>Meta Developer Console</metadev>에서 WhatsApp Business 앱을 생성합니다.',
+      'WhatsApp &gt; API Setup에서 <strong>Phone Number ID</strong>와 <strong>Access Token</strong>을 확인합니다.',
+      'AskDocs 채널 설정에서 Phone Number ID와 Access Token을 입력하고 연결합니다.',
+      '연결 후 제공되는 <strong>Webhook URL</strong>과 <strong>Verify Token</strong>을 Meta 앱의 Webhook 설정에 등록합니다.',
+      'Webhook 필드에서 <strong>messages</strong>를 구독하면 메시지 수신이 시작됩니다.',
+    ],
+    whatsappNote: '<strong>참고:</strong> WhatsApp 채널은 Pro 또는 Enterprise 플랜에서 사용할 수 있습니다. WhatsApp Cloud API의 텍스트 메시지는 최대 <strong>4,096자</strong>까지 지원됩니다.',
   },
   conversations: {
     title: '5. 대화 관리',

@@ -158,6 +158,22 @@ export default async function UserGuidePage() {
           className="mt-4 rounded-lg border border-blue-100 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30 px-4 py-3 text-sm text-blue-800 dark:text-blue-300"
           dangerouslySetInnerHTML={{ __html: c.channels.kakaoNote }}
         />
+
+        <h3 className="mt-6 text-base font-semibold text-gray-800 dark:text-gray-200">{c.channels.whatsappTitle}</h3>
+        <ol className="mt-2 list-inside list-decimal space-y-1 text-sm text-gray-700 dark:text-gray-300">
+          {c.channels.whatsappSteps.map((step, i) => (
+            <li key={i} dangerouslySetInnerHTML={{
+              __html: step
+                .replace('<metadev>', '<a href="https://developers.facebook.com" class="text-blue-600 dark:text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">')
+                .replace('</metadev>', '</a>')
+            }} />
+          ))}
+        </ol>
+
+        <div
+          className="mt-4 rounded-lg border border-blue-100 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30 px-4 py-3 text-sm text-blue-800 dark:text-blue-300"
+          dangerouslySetInnerHTML={{ __html: c.channels.whatsappNote }}
+        />
       </Section>
 
       {/* 5. Conversations */}

@@ -624,6 +624,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      whatsapp_user_mappings: {
+        Row: {
+          id: string;
+          whatsapp_user_id: string;
+          bot_id: string;
+          conversation_id: string;
+          language: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          whatsapp_user_id: string;
+          bot_id: string;
+          conversation_id: string;
+          language?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          whatsapp_user_id?: string;
+          bot_id?: string;
+          conversation_id?: string;
+          language?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

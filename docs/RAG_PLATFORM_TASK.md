@@ -1107,11 +1107,13 @@ Phase 8 ──→ Phase 11 (테스트 + 배포)
 
 > MVP 이후 우선순위에 따라 구현
 
-### Phase 12: KakaoTalk 연동
-- [ ] 카카오 i 오픈빌더 채널 등록 가이드
-- [ ] 스킬 서버 API (`/api/webhooks/kakao/[botId]`)
-- [ ] 블록형 응답 포맷 변환
-- [ ] 채널 관리 UI 추가
+### Phase 12: KakaoTalk 연동 ✅
+- [x] 카카오 i 오픈빌더 채널 등록 가이드
+- [x] 스킬 서버 API (`/api/webhooks/kakao/[botId]`)
+- [x] 블록형 응답 포맷 변환
+- [x] 채널 관리 UI 추가 (`KakaoSetup.tsx`, `ChannelCard.tsx`에 KakaoTalk 카드)
+- [x] 채널 CRUD API (`/api/owner/bots/[botId]/channels/kakao`)
+- [x] KakaoTalk 핸들러 (`src/lib/channels/kakao/handler.ts`)
 
 ### Phase 13: WeChat 연동
 - [ ] 위챗 공식계정 개발자 설정
@@ -1158,15 +1160,32 @@ Phase 8 ──→ Phase 11 (테스트 + 배포)
 | 1 | 스캐폴드 + DB + 인증 | 1주 | `[x]` | — |
 | 2 | 봇 CRUD + 지식베이스 | 2주 | `[x]` | Phase 1 |
 | 3 | 채팅 + 위젯 | 1주 | `[x]` | Phase 2 |
-| 4 | Paddle 결제 | 2주 | `[ ]` | Phase 1 |
-| 5 | Telegram 채널 | 1주 | `[ ]` | Phase 3 |
-| 6 | 플랜 제한 + 사용량 | 1주 | `[ ]` | Phase 3, 4 |
-| 7 | Owner 대시보드 | 2주 | `[ ]` | Phase 3, 4 |
-| 8 | Public API | 1주 | `[ ]` | Phase 3, 6, 7 |
-| 9 | 시스템 관리자 | 1주 | `[ ]` | Phase 6, 7 |
-| 10 | 랜딩 + 마케팅 | 1주 | `[ ]` | — (병렬) |
-| 11 | 테스트 + 배포 | 1주 | `[ ]` | 전체 |
+| 4 | Paddle 결제 | 2주 | `[~]` | Phase 1 |
+| 5 | Telegram 채널 | 1주 | `[x]` | Phase 3 |
+| 6 | 플랜 제한 + 사용량 | 1주 | `[x]` | Phase 3, 4 |
+| 7 | Owner 대시보드 | 2주 | `[x]` | Phase 3, 4 |
+| 8 | Public API | 1주 | `[x]` | Phase 3, 6, 7 |
+| 9 | 시스템 관리자 | 1주 | `[x]` | Phase 6, 7 |
+| 10 | 랜딩 + 마케팅 | 1주 | `[x]` | — (병렬) |
+| 11 | 테스트 + 배포 | 1주 | `[~]` | 전체 |
+| 12 | KakaoTalk 연동 | — | `[x]` | Phase 5 |
 | **합계** | | **14주** | | |
+
+### Post-MVP 추가 작업 (완료)
+
+| 작업 | 커밋 | 상태 |
+|------|------|------|
+| Docs 허브 (사용자 가이드 + 개발자 가이드) | `3e76862` | `[x]` |
+| 다국어 지원 (EN/KO) — docs + 랜딩 페이지 | `eea94e3` | `[x]` |
+| 다크 모드 — 퍼블릭 페이지 + 랜딩 헤더 | `b6d0df1` | `[x]` |
+| 다크 모드 — 어드민 + 대시보드 전체 (37개 파일) | `572cabb` | `[x]` |
+| 퍼블릭 페이지 네비게이션 메뉴 (Pricing, Docs, Demo) | `5835e48` | `[x]` |
+| 인증 기반 네비게이션 (로그인 시 Dashboard, 비로그인 시 Login) | `69ac285` | `[x]` |
+| 대시보드 사이드바에 Admin 링크 (admin 사용자 전용) | `d158b97` | `[x]` |
+| 대시보드 로고 클릭 시 홈 이동 | `891256a` | `[x]` |
+| 빌링 페이지 크래시 수정 + 회원가입 emailRedirectTo 추가 | `9db1f8f` | `[x]` |
+| 다크 모드 텍스트 가시성 수정 | `8c9bdc2` | `[x]` |
+| Vercel 배포 수정 (route-level maxDuration) | `6170e59` | `[x]` |
 
 ---
 

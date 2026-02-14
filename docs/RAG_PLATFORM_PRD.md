@@ -231,7 +231,8 @@ Content-Type: application/json
 | **배포** | Vercel | Serverless Functions |
 | **모니터링** | Vercel Analytics + 커스텀 로깅 | |
 | **이메일** | Resend (또는 Supabase Auth 기본) | 가입 확인, 알림 |
-| **i18n** | next-intl | ko, en, zh, ja (확장 가능) |
+| **i18n** | next-intl | ko, en (구현 완료), zh, ja (확장 가능) |
+| **테마** | next-themes + Tailwind CSS `dark:` | 다크/라이트 모드 전환 (전체 페이지 적용 완료) |
 
 ### 5.2 시스템 아키텍처
 
@@ -608,6 +609,9 @@ CREATE POLICY "Bot owners read messages" ON messages FOR SELECT
 | 데모 | `/demo` | 샘플 챗봇 체험 |
 | 로그인 | `/login` | 이메일 + 소셜 로그인 |
 | 회원가입 | `/signup` | 이메일 + 소셜 가입 |
+| Docs 허브 | `/docs` | API 문서 + 사용자 가이드 + 개발자 가이드 |
+| 사용자 가이드 | `/docs/user-guide` | 봇 생성·문서 업로드·채널 연동 가이드 |
+| 개발자 가이드 | `/docs/developer-guide` | API 인증·엔드포인트·코드 예시 |
 | 개인정보처리방침 | `/privacy` | GDPR/개인정보 |
 | 이용약관 | `/terms` | 서비스 이용약관 |
 | 환불 정책 | `/refund` | Paddle 결제 환불 정책 |
@@ -692,89 +696,101 @@ k-chatbot에서 **그대로 재사용**하는 모듈:
 
 ## 10. 구현 로드맵
 
-### Phase 1: 프로젝트 초기화 (1주)
-- [ ] 새 레포 생성 (`rag-platform`)
-- [ ] k-chatbot 코드베이스 복사 및 리팩토링
-- [ ] 새 DB 스키마 마이그레이션 작성
-- [ ] university 의존성 제거, user/bot 기반 구조로 전환
+### Phase 1: 프로젝트 초기화 (1주) ✅
+- [x] 새 레포 생성 (`rag-platform`)
+- [x] k-chatbot 코드베이스 복사 및 리팩토링
+- [x] 새 DB 스키마 마이그레이션 작성
+- [x] university 의존성 제거, user/bot 기반 구조로 전환
 - [ ] Supabase 프로젝트 생성 (또는 기존 프로젝트 확장)
-- [ ] 환경변수 설정
+- [x] 환경변수 설정
 
-### Phase 2: 인증 & 사용자 관리 (1주)
-- [ ] Supabase Auth 가입/로그인 (이메일 + Google + GitHub)
-- [ ] profiles 테이블 자동 생성 트리거
-- [ ] 무료 플랜 자동 할당
-- [ ] 로그인/회원가입 UI
-- [ ] 프로필 관리 페이지
+### Phase 2: 인증 & 사용자 관리 (1주) ✅
+- [x] Supabase Auth 가입/로그인 (이메일 + Google + GitHub)
+- [x] profiles 테이블 자동 생성 트리거
+- [x] 무료 플랜 자동 할당
+- [x] 로그인/회원가입 UI
+- [x] 프로필 관리 페이지
 
-### Phase 3: 봇 CRUD & 지식베이스 (2주)
-- [ ] 봇 생성/수정/삭제 API & UI
-- [ ] 문서 업로드 (PDF, TXT, DOCX)
-- [ ] URL 크롤링
-- [ ] Q&A 직접 등록
-- [ ] 문서 처리 파이프라인 (기존 RAG 파이프라인 연동)
-- [ ] 봇별 지식베이스 관리 UI
+### Phase 3: 봇 CRUD & 지식베이스 (2주) ✅
+- [x] 봇 생성/수정/삭제 API & UI
+- [x] 문서 업로드 (PDF, TXT, DOCX)
+- [x] URL 크롤링
+- [x] Q&A 직접 등록
+- [x] 문서 처리 파이프라인 (기존 RAG 파이프라인 연동)
+- [x] 봇별 지식베이스 관리 UI
 
-### Phase 4: 챗봇 & 위젯 (1주)
-- [ ] `/chat/{botId}` 챗봇 페이지
-- [ ] `/widget/{botId}` iframe 위젯
-- [ ] 위젯 삽입 코드 생성기
-- [ ] 봇 설정 반영 (환영 메시지, 프롬프트, LLM 파라미터)
-- [ ] 대화 이력 저장
+### Phase 4: 챗봇 & 위젯 (1주) ✅
+- [x] `/chat/{botId}` 챗봇 페이지
+- [x] `/widget/{botId}` iframe 위젯
+- [x] 위젯 삽입 코드 생성기
+- [x] 봇 설정 반영 (환영 메시지, 프롬프트, LLM 파라미터)
+- [x] 대화 이력 저장
 
-### Phase 5: 채널 연동 (2주)
-- [ ] Telegram 봇 동적 등록·Webhook
-- [ ] KakaoTalk 스킬 서버 연동
+### Phase 5: 채널 연동 (2주) ✅
+- [x] Telegram 봇 동적 등록·Webhook
+- [x] KakaoTalk 스킬 서버 연동
 - [ ] WeChat 공식계정 메시지 처리
-- [ ] 채널 관리 UI (토큰 입력, 활성/비활성)
-- [ ] 채널별 대화 구분
+- [x] 채널 관리 UI (토큰 입력, 활성/비활성)
+- [x] 채널별 대화 구분
 
-### Phase 6: 결제 시스템 (2주)
-- [ ] Paddle 연동 (Product, Price 생성)
-- [ ] Paddle.js Checkout Overlay로 구독 생성
-- [ ] 구독 변경/해지 (Paddle Subscription API)
-- [ ] Paddle Webhook 처리 (subscription.created/updated/canceled, transaction.completed/payment_failed)
-- [ ] 사용량 추적 (메시지, 스토리지, API 호출)
-- [ ] 플랜 제한 적용 (미들웨어)
-- [ ] 빌링 UI (구독 상태, 플랜 변경, 인보이스)
-- [ ] 인보이스/영수증 조회 (Paddle 트랜잭션 기반)
+### Phase 6: 결제 시스템 (2주) — 코드 완료, 외부 설정 미완
+- [x] Paddle 연동 코드 (서버 클라이언트, Webhook 핸들러)
+- [x] Paddle.js Checkout Overlay로 구독 생성
+- [x] 구독 변경/해지 (Paddle Subscription API)
+- [x] Paddle Webhook 처리 (subscription.created/updated/canceled, transaction.completed/payment_failed)
+- [x] 사용량 추적 (메시지, 스토리지, API 호출)
+- [x] 플랜 제한 적용 (미들웨어)
+- [x] 빌링 UI (구독 상태, 플랜 변경, 인보이스)
+- [x] 인보이스/영수증 조회 (Paddle 트랜잭션 기반)
+- [ ] Paddle 계정 설정 (Sandbox Products/Prices 생성, Webhook 등록)
 
-### Phase 7: Owner 대시보드 (2주)
-- [ ] 대화 분석 차트 (Recharts)
-- [ ] 대화 로그 검색·필터
-- [ ] 피드백 통계
-- [ ] 사용량 모니터링
-- [ ] API 키 생성·관리
+### Phase 7: Owner 대시보드 (2주) ✅
+- [x] 대화 분석 차트 (Recharts)
+- [x] 대화 로그 검색·필터
+- [x] 피드백 통계
+- [x] 사용량 모니터링
+- [x] API 키 생성·관리
 - [ ] 팀 멤버 초대·역할 관리
 
-### Phase 8: Public API (1주)
-- [ ] `/v1/chat` 엔드포인트 (스트리밍)
-- [ ] API 키 인증 미들웨어
-- [ ] Rate limiting (플랜별)
-- [ ] API 문서 (OpenAPI/Swagger)
-- [ ] 사용량 추적
+### Phase 8: Public API (1주) ✅
+- [x] `/v1/chat` 엔드포인트 (스트리밍)
+- [x] API 키 인증 미들웨어
+- [x] Rate limiting (플랜별)
+- [x] API 문서 페이지
+- [x] 사용량 추적
 
-### Phase 9: 시스템 관리자 (1주)
-- [ ] 사용자 관리 (목록, 검색, 상세, 정지)
-- [ ] 트래픽 모니터링 대시보드
-- [ ] 매출 모니터링 (MRR, ARR, Churn)
-- [ ] 시스템 상태 모니터링
+### Phase 9: 시스템 관리자 (1주) ✅
+- [x] 사용자 관리 (목록, 검색, 상세, 정지)
+- [x] 트래픽 모니터링 대시보드
+- [x] 매출 모니터링 (MRR, ARR, Churn)
+- [x] 시스템 상태 모니터링
 - [ ] 이벤트 로그 조회
 
-### Phase 10: 랜딩 & 마케팅 (1주)
-- [ ] 랜딩 페이지 (히어로, 기능, 가격, CTA)
-- [ ] 가격 페이지 (플랜 비교 테이블)
-- [ ] 데모 챗봇
-- [ ] 개인정보처리방침, 이용약관
-- [ ] SEO 최적화 (메타태그, OG)
+### Phase 10: 랜딩 & 마케팅 (1주) ✅
+- [x] 랜딩 페이지 (히어로, 기능, 가격, CTA)
+- [x] 가격 페이지 (플랜 비교 테이블)
+- [x] 데모 챗봇
+- [x] 개인정보처리방침, 이용약관
+- [x] SEO 최적화 (메타태그, OG)
 
-### Phase 11: 테스트 & 배포 (1주)
-- [ ] Vitest 단위 테스트 (기존 30개 확장)
+### Phase 11: 테스트 & 배포 (1주) — 부분 완료
+- [x] Vitest 단위 테스트 (98 tests 통과)
 - [ ] E2E 테스트 (Playwright)
 - [ ] Paddle Sandbox 모드 결제 검증
 - [ ] Vercel 프로덕션 배포
 - [ ] 커스텀 도메인 설정
 - [ ] 모니터링 알림 설정
+
+### Post-MVP 완료 작업
+- [x] KakaoTalk 채널 연동 (Phase 12)
+- [x] Docs 허브 (사용자 가이드 + 개발자 가이드)
+- [x] 다국어 지원 (EN/KO) — docs + 랜딩 페이지
+- [x] 다크 모드 — 퍼블릭 페이지 (랜딩, 가격, 데모, docs)
+- [x] 다크 모드 — 어드민 + 대시보드 전체 (37개 파일)
+- [x] 퍼블릭 페이지 네비게이션 메뉴 (Pricing, Docs, Demo)
+- [x] 인증 기반 네비게이션 (로그인/비로그인 분기)
+- [x] 대시보드 사이드바 Admin 링크 (admin 역할 전용)
+- [x] 다양한 버그 수정 (빌링 크래시, 다크 모드 텍스트, Vercel 배포)
 
 **총 예상 기간: 약 14주 (3.5개월)**
 

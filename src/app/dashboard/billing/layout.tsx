@@ -1,3 +1,5 @@
+'use client';
+
 import Script from 'next/script';
 
 export default function BillingLayout({ children }: { children: React.ReactNode }) {
@@ -6,21 +8,23 @@ export default function BillingLayout({ children }: { children: React.ReactNode 
 
   return (
     <>
-      <Script
-        src="https://cdn.paddle.com/paddle/v2/paddle.js"
-        strategy="afterInteractive"
-        onLoad={() => {
-          // @ts-expect-error Paddle global
-          if (typeof Paddle !== 'undefined') {
-            if (paddleEnv === 'sandbox') {
-              // @ts-expect-error Paddle global
-              Paddle.Environment.set('sandbox');
-            }
+      {clientToken && (
+        <Script
+          src="https://cdn.paddle.com/paddle/v2/paddle.js"
+          strategy="afterInteractive"
+          onLoad={() => {
             // @ts-expect-error Paddle global
-            Paddle.Setup({ token: clientToken });
-          }
-        }}
-      />
+            if (typeof Paddle !== 'undefined') {
+              if (paddleEnv === 'sandbox') {
+                // @ts-expect-error Paddle global
+                Paddle.Environment.set('sandbox');
+              }
+              // @ts-expect-error Paddle global
+              Paddle.Setup({ token: clientToken });
+            }
+          }}
+        />
+      )}
       {children}
     </>
   );

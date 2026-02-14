@@ -142,6 +142,22 @@ export default async function UserGuidePage() {
             }} />
           ))}
         </ol>
+
+        <h4 className="mt-6 text-sm font-semibold text-gray-800 dark:text-gray-200">{c.channels.kakaoOpenBuilderTitle}</h4>
+        <ol className="mt-2 list-inside list-decimal space-y-1 text-sm text-gray-700 dark:text-gray-300">
+          {c.channels.kakaoOpenBuilderSteps.map((step, i) => (
+            <li key={i} dangerouslySetInnerHTML={{
+              __html: step
+                .replace('<openbuilder>', '<a href="https://i.kakao.com" class="text-blue-600 dark:text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">')
+                .replace('</openbuilder>', '</a>')
+            }} />
+          ))}
+        </ol>
+
+        <div
+          className="mt-4 rounded-lg border border-blue-100 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30 px-4 py-3 text-sm text-blue-800 dark:text-blue-300"
+          dangerouslySetInnerHTML={{ __html: c.channels.kakaoNote }}
+        />
       </Section>
 
       {/* 5. Conversations */}

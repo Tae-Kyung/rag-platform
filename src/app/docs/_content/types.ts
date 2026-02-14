@@ -58,6 +58,9 @@ export interface UserGuideContent {
     telegramSteps: string[];
     kakaoTitle: string;
     kakaoSteps: string[];
+    kakaoOpenBuilderTitle: string;
+    kakaoOpenBuilderSteps: string[];
+    kakaoNote: string;
   };
   conversations: {
     title: string;

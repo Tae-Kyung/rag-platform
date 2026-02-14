@@ -95,6 +95,15 @@ const content: UserGuideContent = {
       '채널 관리자 센터에서 카카오톡 채널을 생성합니다.',
       'AskDocs에서 카카오 App Key와 채널 정보를 입력하여 연결합니다.',
     ],
+    kakaoOpenBuilderTitle: '카카오 i 오픈빌더 스킬 설정',
+    kakaoOpenBuilderSteps: [
+      '<openbuilder>카카오 i 오픈빌더</openbuilder>에 접속하여 봇을 선택합니다.',
+      '<strong>스킬</strong> 메뉴에서 스킬을 생성하고, 스킬 서버 URL에 AskDocs에서 제공하는 Webhook URL을 붙여넣습니다.',
+      '<strong>시나리오 → 폴백 블록</strong>을 선택하고, 봇 응답에서 "스킬데이터 사용"을 체크한 뒤 생성한 스킬을 연결합니다.',
+      '<strong>배포</strong> 탭에서 "배포하기"를 클릭합니다.',
+      '카카오톡에서 채널을 친구 추가한 뒤 메시지를 전송하여 정상 동작을 테스트합니다.',
+    ],
+    kakaoNote: '<strong>참고:</strong> 카카오톡 채널은 Pro 또는 Enterprise 플랜에서 사용할 수 있습니다. 오픈빌더 스킬은 동기식 응답 기준 <strong>5초 타임아웃</strong> 제한이 있으며, simpleText 응답은 최대 <strong>1,000자</strong>까지 지원됩니다.',
   },
   conversations: {
     title: '5. 대화 관리',

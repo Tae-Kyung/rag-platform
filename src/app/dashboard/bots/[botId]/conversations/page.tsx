@@ -98,15 +98,15 @@ export default function ConversationsPage() {
           >
             &larr; Back to bot
           </Link>
-          <h2 className="mt-1 text-2xl font-bold text-gray-900">
+          <h2 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
             Conversations
           </h2>
-          <p className="text-sm text-gray-500">{total} total</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{total} total</p>
         </div>
         <button
           onClick={handleExportCSV}
           disabled={conversations.length === 0}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
         >
           Export CSV
         </button>
@@ -122,7 +122,7 @@ export default function ConversationsPage() {
             setSearch(e.target.value);
             setPage(1);
           }}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
         />
         <select
           value={channel}
@@ -130,7 +130,7 @@ export default function ConversationsPage() {
             setChannel(e.target.value);
             setPage(1);
           }}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
         >
           <option value="">All Channels</option>
           <option value="web">Web</option>
@@ -144,9 +144,9 @@ export default function ConversationsPage() {
             setDateFrom(e.target.value);
             setPage(1);
           }}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
         />
-        <span className="text-gray-400">to</span>
+        <span className="text-gray-400 dark:text-gray-500">to</span>
         <input
           type="date"
           value={dateTo}
@@ -154,14 +154,14 @@ export default function ConversationsPage() {
             setDateTo(e.target.value);
             setPage(1);
           }}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
         />
       </div>
 
       {/* Content: list + detail side panel */}
       <div className="mt-6 grid gap-6 lg:grid-cols-5">
         {/* Conversation list */}
-        <div className="lg:col-span-2 rounded-xl border border-gray-200 bg-white overflow-hidden">
+        <div className="lg:col-span-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
@@ -176,21 +176,21 @@ export default function ConversationsPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3">
+            <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 px-4 py-3">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="rounded px-2 py-1 text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+                className="rounded px-2 py-1 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
               >
                 Previous
               </button>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {page} / {totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="rounded px-2 py-1 text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+                className="rounded px-2 py-1 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
               >
                 Next
               </button>
@@ -199,11 +199,11 @@ export default function ConversationsPage() {
         </div>
 
         {/* Detail panel */}
-        <div className="lg:col-span-3 rounded-xl border border-gray-200 bg-white overflow-hidden">
+        <div className="lg:col-span-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden">
           {selectedId ? (
             <ConversationDetail botId={botId} conversationId={selectedId} />
           ) : (
-            <div className="flex h-64 items-center justify-center text-sm text-gray-400">
+            <div className="flex h-64 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
               Select a conversation to view details
             </div>
           )}

@@ -72,7 +72,7 @@ export default function BotDetailPage() {
   }
 
   if (!bot) {
-    return <p className="py-12 text-center text-gray-500">Bot not found.</p>;
+    return <p className="py-12 text-center text-gray-500 dark:text-gray-400">Bot not found.</p>;
   }
 
   return (
@@ -82,12 +82,12 @@ export default function BotDetailPage() {
           <Link href="/dashboard" className="text-sm text-blue-600 hover:underline">
             &larr; Back to bots
           </Link>
-          <h2 className="mt-1 text-2xl font-bold text-gray-900">{bot.name}</h2>
+          <h2 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{bot.name}</h2>
         </div>
         <div className="flex items-center gap-2">
           <span
             className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-              bot.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+              bot.is_active ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
             }`}
           >
             {bot.is_active ? 'Active' : 'Inactive'}
@@ -97,37 +97,37 @@ export default function BotDetailPage() {
 
       {/* Stats & Actions */}
       <div className="mt-4 flex items-center gap-4">
-        <div className="rounded-lg border border-gray-200 bg-white px-4 py-3">
-          <div className="text-2xl font-bold text-gray-900">{bot.document_count}</div>
-          <div className="text-xs text-gray-500">Documents</div>
+        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3">
+          <div className="text-2xl font-bold text-gray-900 dark:text-white">{bot.document_count}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">Documents</div>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-white px-4 py-3">
-          <div className="text-2xl font-bold text-gray-900">{bot.conversation_count}</div>
-          <div className="text-xs text-gray-500">Conversations</div>
+        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3">
+          <div className="text-2xl font-bold text-gray-900 dark:text-white">{bot.conversation_count}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">Conversations</div>
         </div>
         <div className="ml-auto flex gap-2">
           <Link
             href={`/dashboard/bots/${botId}/analytics`}
-            className="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="inline-flex items-center gap-1 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             Analytics
           </Link>
           <Link
             href={`/dashboard/bots/${botId}/conversations`}
-            className="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="inline-flex items-center gap-1 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             Conversations
           </Link>
           <Link
             href={`/chat/${botId}`}
             target="_blank"
-            className="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="inline-flex items-center gap-1 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             Test Chat
           </Link>
           <Link
             href={`/dashboard/bots/${botId}/channels`}
-            className="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="inline-flex items-center gap-1 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             Channels
           </Link>
@@ -141,14 +141,14 @@ export default function BotDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="mt-6 border-b border-gray-200">
+      <div className="mt-6 border-b border-gray-200 dark:border-gray-700">
         <nav className="flex gap-6">
           <button
             onClick={() => setTab('settings')}
             className={`border-b-2 pb-3 text-sm font-medium ${
               tab === 'settings'
                 ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
             Settings
@@ -158,7 +158,7 @@ export default function BotDetailPage() {
             className={`border-b-2 pb-3 text-sm font-medium ${
               tab === 'knowledge'
                 ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
             Knowledge Base
@@ -169,7 +169,7 @@ export default function BotDetailPage() {
       <div className="mt-6">
         {tab === 'settings' ? (
           <div className="max-w-2xl">
-            <div className="rounded-xl border border-gray-200 bg-white p-6">
+            <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6">
               <BotForm
                 mode="edit"
                 botId={botId}
@@ -184,9 +184,9 @@ export default function BotDetailPage() {
               />
             </div>
 
-            <div className="mt-8 rounded-xl border border-red-200 bg-red-50 p-6">
-              <h3 className="text-sm font-medium text-red-800">Danger Zone</h3>
-              <p className="mt-1 text-sm text-red-600">
+            <div className="mt-8 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 p-6">
+              <h3 className="text-sm font-medium text-red-800 dark:text-red-300">Danger Zone</h3>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 Deleting this bot will permanently remove all documents, chunks, and conversations.
               </p>
               <button
@@ -206,7 +206,7 @@ export default function BotDetailPage() {
             >
               Manage Documents
             </Link>
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
               Upload documents, crawl URLs, and add Q&A pairs to build your knowledge base.
             </p>
           </div>

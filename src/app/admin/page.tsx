@@ -75,8 +75,8 @@ export default function AdminDashboardPage() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900">Admin Dashboard</h2>
-      <p className="mt-1 text-sm text-gray-500">System overview</p>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h2>
+      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">System overview</p>
 
       {/* KPI Cards */}
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -100,8 +100,8 @@ export default function AdminDashboardPage() {
       {/* Mini Charts */}
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         {/* 7-day messages */}
-        <div className="rounded-xl border border-gray-200 bg-white p-6">
-          <h3 className="text-sm font-medium text-gray-700">Messages (7 days)</h3>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Messages (7 days)</h3>
           <div className="mt-4 h-48">
             {traffic?.dailyMessages && traffic.dailyMessages.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -118,7 +118,7 @@ export default function AdminDashboardPage() {
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex h-full items-center justify-center text-sm text-gray-400">
+              <div className="flex h-full items-center justify-center text-sm text-gray-400 dark:text-gray-500">
                 No data
               </div>
             )}
@@ -126,8 +126,8 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Summary cards */}
-        <div className="rounded-xl border border-gray-200 bg-white p-6">
-          <h3 className="text-sm font-medium text-gray-700">System Resources</h3>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">System Resources</h3>
           <div className="mt-4 space-y-3">
             <ResourceRow label="Documents" value={status?.counts.documents ?? 0} />
             <ResourceRow label="Document Chunks" value={status?.counts.document_chunks ?? 0} />
@@ -141,21 +141,21 @@ export default function AdminDashboardPage() {
 
 function KpiCard({ label, value, sub }: { label: string; value: number | string; sub?: string }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5">
-      <div className="text-sm text-gray-500">{label}</div>
-      <div className="mt-1 text-2xl font-bold text-gray-900">
+    <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
+      <div className="text-sm text-gray-500 dark:text-gray-400">{label}</div>
+      <div className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
         {typeof value === 'number' ? value.toLocaleString() : value}
       </div>
-      {sub && <div className="mt-0.5 text-xs text-gray-400">{sub}</div>}
+      {sub && <div className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">{sub}</div>}
     </div>
   );
 }
 
 function ResourceRow({ label, value }: { label: string; value: number }) {
   return (
-    <div className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-2.5">
-      <span className="text-sm text-gray-600">{label}</span>
-      <span className="text-sm font-semibold text-gray-900">{value.toLocaleString()}</span>
+    <div className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-2.5 dark:bg-gray-800">
+      <span className="text-sm text-gray-600 dark:text-gray-400">{label}</span>
+      <span className="text-sm font-semibold text-gray-900 dark:text-white">{value.toLocaleString()}</span>
     </div>
   );
 }

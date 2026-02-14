@@ -109,24 +109,24 @@ export default function DocumentsPage() {
           >
             &larr; Back to bot
           </Link>
-          <h2 className="mt-1 text-2xl font-bold text-gray-900">Knowledge Base</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <h2 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">Knowledge Base</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {documents.length} documents
           </p>
         </div>
       </div>
 
       {/* Add content section */}
-      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6">
-        <div className="flex gap-2 border-b border-gray-200 pb-3">
+      <div className="mt-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6">
+        <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700 pb-3">
           {(['upload', 'crawl', 'qa'] as const).map((section) => (
             <button
               key={section}
               onClick={() => setActiveSection(section)}
               className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
                 activeSection === section
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-500 hover:bg-gray-100'
+                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
               {section === 'upload' ? 'Upload File' : section === 'crawl' ? 'Crawl URL' : 'Add Q&A'}
@@ -147,7 +147,7 @@ export default function DocumentsPage() {
                 value={crawlUrl}
                 onChange={(e) => setCrawlUrl(e.target.value)}
                 placeholder="https://example.com/page"
-                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
               <button
                 type="submit"
@@ -166,8 +166,8 @@ export default function DocumentsPage() {
       </div>
 
       {/* Document list */}
-      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6">
-        <h3 className="text-lg font-semibold text-gray-900">Documents</h3>
+      <div className="mt-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Documents</h3>
         <div className="mt-4">
           <DocumentList
             documents={documents}

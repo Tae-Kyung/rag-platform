@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { LogoutButton } from '@/app/dashboard/LogoutButton';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default async function AdminLayout({
   children,
@@ -38,14 +39,14 @@ export default async function AdminLayout({
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <aside className="hidden w-64 shrink-0 border-r border-gray-200 bg-white md:block">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-800">
+      <aside className="hidden w-64 shrink-0 border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 md:block">
         <div className="flex h-full flex-col">
-          <div className="border-b border-gray-200 px-6 py-4">
-            <Link href="/admin" className="text-xl font-bold text-gray-900">
+          <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+            <Link href="/admin" className="text-xl font-bold text-gray-900 dark:text-white">
               AskDocs
             </Link>
-            <span className="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-700">
+            <span className="ml-2 rounded bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 text-xs font-medium text-red-700 dark:text-red-400">
               Admin
             </span>
           </div>
@@ -54,17 +55,17 @@ export default async function AdminLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                className="flex items-center rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
               >
-                <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <svg className="mr-3 h-5 w-5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
                 </svg>
                 {item.label}
               </Link>
             ))}
           </nav>
-          <div className="border-t border-gray-200 p-4">
-            <div className="text-sm text-gray-500 truncate">{displayName}</div>
+          <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+            <div className="text-sm text-gray-500 dark:text-gray-400 truncate">{displayName}</div>
             <Link href="/dashboard" className="mt-1 block text-xs text-blue-600 hover:underline">
               Back to Dashboard
             </Link>
@@ -73,14 +74,15 @@ export default async function AdminLayout({
       </aside>
 
       <div className="flex flex-1 flex-col">
-        <header className="border-b border-gray-200 bg-white px-6 py-3">
+        <header className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 px-6 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 md:hidden">
-              <Link href="/admin" className="text-xl font-bold text-gray-900">AskDocs</Link>
-              <span className="rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-700">Admin</span>
+              <Link href="/admin" className="text-xl font-bold text-gray-900 dark:text-white">AskDocs</Link>
+              <span className="rounded bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 text-xs font-medium text-red-700 dark:text-red-400">Admin</span>
             </div>
             <div className="ml-auto flex items-center gap-4">
-              <span className="hidden text-sm text-gray-600 sm:inline">{displayName}</span>
+              <ThemeToggle />
+              <span className="hidden text-sm text-gray-600 dark:text-gray-400 sm:inline">{displayName}</span>
               <LogoutButton />
             </div>
           </div>

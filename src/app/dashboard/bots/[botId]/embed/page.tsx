@@ -48,7 +48,7 @@ export default function EmbedPage({ params }: { params: Promise<{ botId: string 
       {/* Script Tag */}
       <section className="mb-8">
         <h2 className="mb-2 text-lg font-semibold">Script Tag (Recommended)</h2>
-        <p className="mb-3 text-sm text-gray-600">
+        <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">
           Add this script to your website. A floating chat button will appear in the bottom-right corner.
         </p>
         <div className="relative rounded-lg bg-gray-900 p-4">
@@ -62,7 +62,7 @@ export default function EmbedPage({ params }: { params: Promise<{ botId: string 
             {copied === 'script' ? 'Copied!' : 'Copy'}
           </button>
         </div>
-        <div className="mt-2 text-xs text-gray-500">
+        <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
           Optional attributes: <code>data-position=&quot;bottom-left&quot;</code>,{' '}
           <code>data-color=&quot;#FF5733&quot;</code>,{' '}
           <code>data-lang=&quot;ko&quot;</code>
@@ -72,7 +72,7 @@ export default function EmbedPage({ params }: { params: Promise<{ botId: string 
       {/* Iframe */}
       <section className="mb-8">
         <h2 className="mb-2 text-lg font-semibold">Iframe Embed</h2>
-        <p className="mb-3 text-sm text-gray-600">
+        <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">
           Embed the chat widget directly in your page layout.
         </p>
         <div className="relative rounded-lg bg-gray-900 p-4">
@@ -91,7 +91,7 @@ export default function EmbedPage({ params }: { params: Promise<{ botId: string 
       {/* Direct Link */}
       <section className="mb-8">
         <h2 className="mb-2 text-lg font-semibold">Direct Link</h2>
-        <p className="mb-3 text-sm text-gray-600">
+        <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">
           Share this link directly to let users chat with your bot.
         </p>
         <div className="relative rounded-lg bg-gray-900 p-4">
@@ -111,7 +111,7 @@ export default function EmbedPage({ params }: { params: Promise<{ botId: string 
       {origin && (
         <section>
           <h2 className="mb-2 text-lg font-semibold">Preview</h2>
-          <div className="flex justify-center rounded-lg border bg-gray-50 p-6">
+          <div className="flex justify-center rounded-lg border dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-6">
             <iframe
               src={`${origin}/widget/${botId}`}
               width="380"

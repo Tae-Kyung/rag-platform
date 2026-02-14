@@ -54,8 +54,8 @@ export default function DashboardPage() {
       <UsageAlertBanner />
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">My Bots</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">My Bots</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {bots.length} / {maxBots === -1 ? 'unlimited' : maxBots} bots
           </p>
         </div>
@@ -74,7 +74,7 @@ export default function DashboardPage() {
             >
               + New Bot
             </button>
-            <p className="mt-1 text-xs text-orange-600">
+            <p className="mt-1 text-xs text-orange-600 dark:text-orange-400">
               Bot limit reached. Upgrade your plan.
             </p>
           </div>
@@ -82,11 +82,11 @@ export default function DashboardPage() {
       </div>
 
       {bots.length === 0 ? (
-        <div className="mt-8 rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
-          <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+        <div className="mt-8 rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 p-12 text-center">
+          <svg className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" />
           </svg>
-          <p className="mt-4 text-gray-500">You haven&apos;t created any bots yet.</p>
+          <p className="mt-4 text-gray-500 dark:text-gray-400">You haven&apos;t created any bots yet.</p>
           <Link
             href="/dashboard/bots/new"
             className="mt-4 inline-block rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700"

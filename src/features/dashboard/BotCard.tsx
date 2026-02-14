@@ -19,15 +19,15 @@ export function BotCard({ bot }: BotCardProps) {
   return (
     <Link
       href={`/dashboard/bots/${bot.id}`}
-      className="block rounded-xl border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md"
+      className="block rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 p-6 transition-shadow hover:shadow-md"
     >
       <div className="flex items-start justify-between">
-        <h3 className="text-lg font-semibold text-gray-900 truncate">{bot.name}</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">{bot.name}</h3>
         <span
           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
             bot.is_active
-              ? 'bg-green-100 text-green-700'
-              : 'bg-gray-100 text-gray-500'
+              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+              : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
           }`}
         >
           {bot.is_active ? 'Active' : 'Inactive'}
@@ -35,10 +35,10 @@ export function BotCard({ bot }: BotCardProps) {
       </div>
 
       {bot.description && (
-        <p className="mt-2 text-sm text-gray-500 line-clamp-2">{bot.description}</p>
+        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{bot.description}</p>
       )}
 
-      <div className="mt-4 flex items-center gap-4 text-xs text-gray-400">
+      <div className="mt-4 flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
         <span className="flex items-center gap-1">
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
@@ -51,7 +51,7 @@ export function BotCard({ bot }: BotCardProps) {
           </svg>
           {bot.conversation_count} chats
         </span>
-        <span className="ml-auto text-xs text-gray-400">{bot.model}</span>
+        <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">{bot.model}</span>
       </div>
     </Link>
   );

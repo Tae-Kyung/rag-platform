@@ -45,20 +45,20 @@ export default function AdminSystemPage() {
     );
   }
 
-  if (!data) return <p className="py-12 text-center text-gray-500">Failed to load system status.</p>;
+  if (!data) return <p className="py-12 text-center text-gray-500 dark:text-gray-400">Failed to load system status.</p>;
 
   return (
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">System Status</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">System Status</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Last checked: {new Date(data.checked_at).toLocaleString()}
           </p>
         </div>
         <button
           onClick={fetchStatus}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
         >
           Refresh
         </button>
@@ -84,8 +84,8 @@ export default function AdminSystemPage() {
       </div>
 
       {/* Resource Counts */}
-      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6">
-        <h3 className="text-sm font-medium text-gray-700">Resources</h3>
+      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
+        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Resources</h3>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <ResourceItem label="Users" value={data.counts.users} />
           <ResourceItem label="Bots" value={data.counts.bots} />
@@ -105,9 +105,9 @@ function StatusCard({ label, status, error, value }: {
   value?: string;
 }) {
   const colors: Record<string, { bg: string; dot: string; text: string }> = {
-    healthy: { bg: 'bg-green-50 border-green-200', dot: 'bg-green-500', text: 'text-green-700' },
-    warning: { bg: 'bg-yellow-50 border-yellow-200', dot: 'bg-yellow-500', text: 'text-yellow-700' },
-    error: { bg: 'bg-red-50 border-red-200', dot: 'bg-red-500', text: 'text-red-700' },
+    healthy: { bg: 'bg-green-50 border-green-200 dark:bg-green-900/30 dark:border-green-800', dot: 'bg-green-500', text: 'text-green-700 dark:text-green-400' },
+    warning: { bg: 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/30 dark:border-yellow-800', dot: 'bg-yellow-500', text: 'text-yellow-700 dark:text-yellow-400' },
+    error: { bg: 'bg-red-50 border-red-200 dark:bg-red-900/30 dark:border-red-800', dot: 'bg-red-500', text: 'text-red-700 dark:text-red-400' },
   };
 
   const c = colors[status] || colors.healthy;
@@ -116,21 +116,21 @@ function StatusCard({ label, status, error, value }: {
     <div className={`rounded-xl border p-5 ${c.bg}`}>
       <div className="flex items-center gap-2">
         <div className={`h-2.5 w-2.5 rounded-full ${c.dot}`} />
-        <span className="text-sm font-medium text-gray-700">{label}</span>
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</span>
       </div>
       <div className={`mt-2 text-lg font-bold ${c.text}`}>
         {value || status.charAt(0).toUpperCase() + status.slice(1)}
       </div>
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+      {error && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{error}</p>}
     </div>
   );
 }
 
 function ResourceItem({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-lg bg-gray-50 px-4 py-3 text-center">
-      <div className="text-2xl font-bold text-gray-900">{value.toLocaleString()}</div>
-      <div className="mt-0.5 text-xs text-gray-500">{label}</div>
+    <div className="rounded-lg bg-gray-50 px-4 py-3 text-center dark:bg-gray-800">
+      <div className="text-2xl font-bold text-gray-900 dark:text-white">{value.toLocaleString()}</div>
+      <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{label}</div>
     </div>
   );
 }

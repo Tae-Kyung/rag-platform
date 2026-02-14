@@ -60,15 +60,15 @@ export function ConversationDetail({ botId, conversationId }: Props) {
   }
 
   if (!data) {
-    return <p className="py-8 text-center text-sm text-gray-400">Failed to load conversation</p>;
+    return <p className="py-8 text-center text-sm text-gray-400 dark:text-gray-500">Failed to load conversation</p>;
   }
 
   return (
     <div>
       {/* Header */}
-      <div className="border-b border-gray-200 px-4 py-3">
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <span className="font-medium text-gray-700">
+      <div className="border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+          <span className="font-medium text-gray-700 dark:text-gray-300">
             {data.conversation.channel.toUpperCase()}
           </span>
           <span>&middot;</span>
@@ -85,33 +85,33 @@ export function ConversationDetail({ botId, conversationId }: Props) {
             key={msg.id}
             className={`rounded-lg p-3 ${
               msg.role === 'user'
-                ? 'bg-blue-50 text-blue-900'
-                : 'bg-gray-50 text-gray-800'
+                ? 'bg-blue-50 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200'
+                : 'bg-gray-50 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
             }`}
           >
             <div className="mb-1 flex items-center justify-between">
-              <span className="text-xs font-medium uppercase text-gray-400">
+              <span className="text-xs font-medium uppercase text-gray-400 dark:text-gray-500">
                 {msg.role}
               </span>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-gray-400 dark:text-gray-500">
                 {new Date(msg.created_at).toLocaleTimeString()}
               </span>
             </div>
             <p className="whitespace-pre-wrap text-sm">{msg.content}</p>
             {msg.tokens_used && (
-              <span className="mt-1 inline-block text-xs text-gray-400">
+              <span className="mt-1 inline-block text-xs text-gray-400 dark:text-gray-500">
                 {msg.tokens_used} tokens
               </span>
             )}
             {msg.feedback && (
-              <div className="mt-2 flex items-center gap-2 border-t border-gray-200 pt-2">
-                <span className="text-xs text-gray-500">Rating:</span>
-                <span className="text-sm font-medium text-yellow-600">
+              <div className="mt-2 flex items-center gap-2 border-t border-gray-200 dark:border-gray-700 pt-2">
+                <span className="text-xs text-gray-500 dark:text-gray-400">Rating:</span>
+                <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
                   {'★'.repeat(msg.feedback.rating ?? 0)}
                   {'☆'.repeat(5 - (msg.feedback.rating ?? 0))}
                 </span>
                 {msg.feedback.comment && (
-                  <span className="text-xs text-gray-500 italic">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 italic">
                     &quot;{msg.feedback.comment}&quot;
                   </span>
                 )}

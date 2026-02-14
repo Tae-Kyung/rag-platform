@@ -48,8 +48,8 @@ export function TelegramSetup({ botId, onConnected }: TelegramSetupProps) {
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-sm font-medium text-gray-700">Bot Token</label>
-        <p className="text-xs text-gray-500">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Bot Token</label>
+        <p className="text-xs text-gray-500 dark:text-gray-400">
           Get your bot token from{' '}
           <a
             href="https://t.me/BotFather"
@@ -66,10 +66,10 @@ export function TelegramSetup({ botId, onConnected }: TelegramSetupProps) {
           value={token}
           onChange={(e) => setToken(e.target.value)}
           placeholder="123456789:ABCdef..."
-          className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
       <button
         onClick={handleConnect}
         disabled={connecting}

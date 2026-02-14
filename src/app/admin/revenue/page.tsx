@@ -54,11 +54,11 @@ export default function AdminRevenuePage() {
     );
   }
 
-  if (!data) return <p className="py-12 text-center text-gray-500">Failed to load revenue data.</p>;
+  if (!data) return <p className="py-12 text-center text-gray-500 dark:text-gray-400">Failed to load revenue data.</p>;
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900">Revenue</h2>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Revenue</h2>
 
       {/* KPI Cards */}
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -76,8 +76,8 @@ export default function AdminRevenuePage() {
       {/* Charts */}
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         {/* Plan Distribution */}
-        <div className="rounded-xl border border-gray-200 bg-white p-6">
-          <h3 className="text-sm font-medium text-gray-700">Plan Distribution</h3>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Plan Distribution</h3>
           <div className="mt-4 h-64">
             {data.planDistribution.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -100,14 +100,14 @@ export default function AdminRevenuePage() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex h-full items-center justify-center text-sm text-gray-400">No subscribers yet</div>
+              <div className="flex h-full items-center justify-center text-sm text-gray-400 dark:text-gray-500">No subscribers yet</div>
             )}
           </div>
         </div>
 
         {/* Monthly Revenue */}
-        <div className="rounded-xl border border-gray-200 bg-white p-6">
-          <h3 className="text-sm font-medium text-gray-700">Monthly Revenue</h3>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Monthly Revenue</h3>
           <div className="mt-4 h-64">
             {data.revenueChart.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -123,7 +123,7 @@ export default function AdminRevenuePage() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex h-full items-center justify-center text-sm text-gray-400">No revenue data</div>
+              <div className="flex h-full items-center justify-center text-sm text-gray-400 dark:text-gray-500">No revenue data</div>
             )}
           </div>
         </div>
@@ -133,13 +133,14 @@ export default function AdminRevenuePage() {
 }
 
 function KpiCard({ label, value, sub, color }: { label: string; value: number | string; sub?: string; color?: string }) {
+  const darkColor = color === 'text-red-600' ? 'dark:text-red-400' : 'dark:text-white';
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5">
-      <div className="text-sm text-gray-500">{label}</div>
-      <div className={`mt-1 text-2xl font-bold ${color || 'text-gray-900'}`}>
+    <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
+      <div className="text-sm text-gray-500 dark:text-gray-400">{label}</div>
+      <div className={`mt-1 text-2xl font-bold ${color || 'text-gray-900'} ${darkColor}`}>
         {typeof value === 'number' ? value.toLocaleString() : value}
       </div>
-      {sub && <div className="mt-0.5 text-xs text-gray-400">{sub}</div>}
+      {sub && <div className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">{sub}</div>}
     </div>
   );
 }

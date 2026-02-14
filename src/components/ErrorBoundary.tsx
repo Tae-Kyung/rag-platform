@@ -28,10 +28,10 @@ export class ErrorBoundary extends Component<Props, State> {
         this.props.fallback || (
           <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-8 text-center">
             <div className="text-4xl">!</div>
-            <h2 className="text-xl font-semibold text-gray-800">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
               Something went wrong
             </h2>
-            <p className="max-w-md text-sm text-gray-500">
+            <p className="max-w-md text-sm text-gray-500 dark:text-gray-400">
               Please refresh the page or try again later.
             </p>
             <button

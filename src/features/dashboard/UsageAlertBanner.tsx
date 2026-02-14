@@ -48,8 +48,8 @@ export function UsageAlertBanner() {
     <div
       className={`mb-6 rounded-xl border px-4 py-3 ${
         hasLimitReached
-          ? 'border-red-200 bg-red-50'
-          : 'border-yellow-200 bg-yellow-50'
+          ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/30'
+          : 'border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/30'
       }`}
     >
       <div className="flex items-center justify-between">
@@ -70,12 +70,12 @@ export function UsageAlertBanner() {
           <div>
             <span
               className={`text-sm font-medium ${
-                hasLimitReached ? 'text-red-800' : 'text-yellow-800'
+                hasLimitReached ? 'text-red-800 dark:text-red-300' : 'text-yellow-800 dark:text-yellow-300'
               }`}
             >
               {hasLimitReached ? 'Plan limit reached' : 'Approaching plan limit'}
             </span>
-            <span className="ml-2 text-sm text-gray-600">
+            <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
               {warnings.map((w) => `${w.label}: ${w.pct}%`).join(' · ')}
             </span>
           </div>

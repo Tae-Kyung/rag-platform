@@ -90,8 +90,8 @@ export default function ChannelsPage() {
         <Link href={`/dashboard/bots/${botId}`} className="text-sm text-blue-600 hover:underline">
           &larr; Back to bot
         </Link>
-        <h2 className="mt-1 text-2xl font-bold text-gray-900">Channels</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">Channels</h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Connect your bot to messaging platforms.
         </p>
       </div>
@@ -115,9 +115,9 @@ export default function ChannelsPage() {
             <TelegramSetup botId={botId} onConnected={fetchChannels} />
           )}
           {telegramConfig && (
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               <p>
-                Token: <code className="text-gray-700">{telegramConfig.config.bot_token?.slice(0, 8)}...</code>
+                Token: <code className="text-gray-700 dark:text-gray-300">{telegramConfig.config.bot_token?.slice(0, 8)}...</code>
               </p>
               <p className="mt-1">
                 Connected {new Date(telegramConfig.created_at).toLocaleDateString()}

@@ -53,40 +53,40 @@ export function QAPairForm({ botId, onCreated }: QAPairFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <p className="text-sm text-red-600">{error}</p>
+        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Question</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Question</label>
         <textarea
           rows={2}
           required
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           placeholder="What is your return policy?"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Answer</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Answer</label>
         <textarea
           rows={4}
           required
           value={answer}
           onChange={(e) => setAnswer(e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           placeholder="Our return policy allows returns within 30 days..."
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Category (optional)</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category (optional)</label>
         <input
           type="text"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           placeholder="e.g., Shipping, Returns, General"
         />
       </div>

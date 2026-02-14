@@ -16,11 +16,11 @@ interface Props {
 
 export function ConversationChart({ data }: Props) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6">
-      <h3 className="text-sm font-medium text-gray-700">Daily Conversations</h3>
+    <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 p-6">
+      <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Daily Conversations</h3>
       <div className="mt-4 h-64">
         {data.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-sm text-gray-400">
+          <div className="flex h-full items-center justify-center text-sm text-gray-400 dark:text-gray-500">
             No data for this period
           </div>
         ) : (

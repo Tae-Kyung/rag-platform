@@ -61,22 +61,22 @@ export default function AdminTrafficPage() {
     );
   }
 
-  if (!data) return <p className="py-12 text-center text-gray-500">Failed to load traffic data.</p>;
+  if (!data) return <p className="py-12 text-center text-gray-500 dark:text-gray-400">Failed to load traffic data.</p>;
 
   return (
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Traffic</h2>
-          <p className="mt-1 text-sm text-gray-500">{data.totalMessages.toLocaleString()} total messages</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Traffic</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{data.totalMessages.toLocaleString()} total messages</p>
         </div>
-        <div className="flex rounded-lg border border-gray-300 bg-white">
+        <div className="flex rounded-lg border border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900">
           {PERIODS.map((p) => (
             <button
               key={p.value}
               onClick={() => setPeriod(p.value)}
               className={`px-3 py-1.5 text-sm font-medium ${
-                period === p.value ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'
+                period === p.value ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
               } first:rounded-l-lg last:rounded-r-lg`}
             >
               {p.label}
@@ -87,17 +87,17 @@ export default function AdminTrafficPage() {
 
       {/* KPI row */}
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-gray-200 bg-white p-5">
-          <div className="text-sm text-gray-500">Total Messages</div>
-          <div className="mt-1 text-2xl font-bold text-gray-900">{data.totalMessages.toLocaleString()}</div>
+        <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
+          <div className="text-sm text-gray-500 dark:text-gray-400">Total Messages</div>
+          <div className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{data.totalMessages.toLocaleString()}</div>
         </div>
-        <div className="rounded-xl border border-gray-200 bg-white p-5">
-          <div className="text-sm text-gray-500">Errors</div>
-          <div className="mt-1 text-2xl font-bold text-red-600">{data.errorCount}</div>
+        <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
+          <div className="text-sm text-gray-500 dark:text-gray-400">Errors</div>
+          <div className="mt-1 text-2xl font-bold text-red-600 dark:text-red-400">{data.errorCount}</div>
         </div>
-        <div className="rounded-xl border border-gray-200 bg-white p-5">
-          <div className="text-sm text-gray-500">Avg/Day</div>
-          <div className="mt-1 text-2xl font-bold text-gray-900">
+        <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
+          <div className="text-sm text-gray-500 dark:text-gray-400">Avg/Day</div>
+          <div className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
             {data.dailyMessages.length > 0
               ? Math.round(data.totalMessages / data.dailyMessages.length)
               : 0}
@@ -108,8 +108,8 @@ export default function AdminTrafficPage() {
       {/* Charts */}
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         {/* Daily messages */}
-        <div className="rounded-xl border border-gray-200 bg-white p-6">
-          <h3 className="text-sm font-medium text-gray-700">Daily Messages</h3>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Daily Messages</h3>
           <div className="mt-4 h-64">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={data.dailyMessages}>
@@ -124,8 +124,8 @@ export default function AdminTrafficPage() {
         </div>
 
         {/* Channel distribution */}
-        <div className="rounded-xl border border-gray-200 bg-white p-6">
-          <h3 className="text-sm font-medium text-gray-700">Channel Distribution</h3>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Channel Distribution</h3>
           <div className="mt-4 h-64">
             {data.channelDistribution.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -148,34 +148,34 @@ export default function AdminTrafficPage() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex h-full items-center justify-center text-sm text-gray-400">No data</div>
+              <div className="flex h-full items-center justify-center text-sm text-gray-400 dark:text-gray-500">No data</div>
             )}
           </div>
         </div>
       </div>
 
       {/* Top Users */}
-      <div className="mt-6 rounded-xl border border-gray-200 bg-white overflow-hidden">
-        <div className="border-b border-gray-200 px-4 py-3">
-          <h3 className="text-sm font-medium text-gray-700">Top Users by Traffic</h3>
+      <div className="mt-6 rounded-xl border border-gray-200 bg-white overflow-hidden dark:border-gray-700 dark:bg-gray-900">
+        <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Top Users by Traffic</h3>
         </div>
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-gray-200 bg-gray-50">
+          <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
             <tr>
-              <th className="px-4 py-2 font-medium text-gray-600">#</th>
-              <th className="px-4 py-2 font-medium text-gray-600">User</th>
-              <th className="px-4 py-2 font-medium text-gray-600">Messages</th>
+              <th className="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">#</th>
+              <th className="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">User</th>
+              <th className="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Messages</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
             {data.topUsers.map((u, i) => (
               <tr key={u.user_id}>
-                <td className="px-4 py-2 text-gray-400">{i + 1}</td>
+                <td className="px-4 py-2 text-gray-400 dark:text-gray-500">{i + 1}</td>
                 <td className="px-4 py-2">
-                  <div className="font-medium text-gray-900">{u.full_name || u.email}</div>
-                  {u.full_name && <div className="text-xs text-gray-500">{u.email}</div>}
+                  <div className="font-medium text-gray-900 dark:text-white">{u.full_name || u.email}</div>
+                  {u.full_name && <div className="text-xs text-gray-500 dark:text-gray-400">{u.email}</div>}
                 </td>
-                <td className="px-4 py-2 font-semibold text-gray-900">{u.message_count.toLocaleString()}</td>
+                <td className="px-4 py-2 font-semibold text-gray-900 dark:text-white">{u.message_count.toLocaleString()}</td>
               </tr>
             ))}
           </tbody>

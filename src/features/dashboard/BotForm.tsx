@@ -79,11 +79,11 @@ export function BotForm({ mode, botId, initialData }: BotFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</div>
+        <div className="rounded-lg bg-red-50 dark:bg-red-900/30 p-3 text-sm text-red-600 dark:text-red-400">{error}</div>
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Bot Name <span className="text-red-500">*</span>
         </label>
         <input
@@ -92,45 +92,45 @@ export function BotForm({ mode, botId, initialData }: BotFormProps) {
           maxLength={100}
           value={form.name}
           onChange={(e) => updateField('name', e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           placeholder="My Customer Support Bot"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Description</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
         <input
           type="text"
           maxLength={500}
           value={form.description}
           onChange={(e) => updateField('description', e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           placeholder="A bot for answering customer questions"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">System Prompt</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">System Prompt</label>
         <textarea
           rows={5}
           maxLength={5000}
           value={form.system_prompt}
           onChange={(e) => updateField('system_prompt', e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           placeholder="You are a helpful customer support agent..."
         />
-        <p className="mt-1 text-xs text-gray-400">
+        <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
           Optional. Defines how the bot should behave. Leave empty for a default assistant.
         </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Model</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Model</label>
           <select
             value={form.model}
             onChange={(e) => updateField('model', e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             {MODEL_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -141,7 +141,7 @@ export function BotForm({ mode, botId, initialData }: BotFormProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Temperature: {form.temperature.toFixed(1)}
           </label>
           <input
@@ -153,14 +153,14 @@ export function BotForm({ mode, botId, initialData }: BotFormProps) {
             onChange={(e) => updateField('temperature', parseFloat(e.target.value))}
             className="mt-2 w-full"
           />
-          <div className="flex justify-between text-xs text-gray-400">
+          <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500">
             <span>Precise</span>
             <span>Creative</span>
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Max Tokens</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Max Tokens</label>
           <input
             type="number"
             min={100}
@@ -168,7 +168,7 @@ export function BotForm({ mode, botId, initialData }: BotFormProps) {
             step={100}
             value={form.max_tokens}
             onChange={(e) => updateField('max_tokens', parseInt(e.target.value) || 1000)}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
       </div>
@@ -184,7 +184,7 @@ export function BotForm({ mode, botId, initialData }: BotFormProps) {
         <button
           type="button"
           onClick={() => router.back()}
-          className="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
         >
           Cancel
         </button>

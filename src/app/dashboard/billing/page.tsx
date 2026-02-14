@@ -152,7 +152,7 @@ export default function BillingPage() {
   }
 
   if (!data) {
-    return <p className="text-gray-500">Failed to load billing information.</p>;
+    return <p className="text-gray-500 dark:text-gray-400">Failed to load billing information.</p>;
   }
 
   const currentPlanId = data.subscription?.plan_id ?? 'free';
@@ -164,21 +164,21 @@ export default function BillingPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Billing</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Billing</h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Manage your subscription, usage, and invoices.
         </p>
       </div>
 
       {/* Current Subscription */}
-      <section className="rounded-xl border border-gray-200 bg-white p-6">
-        <h3 className="text-lg font-semibold text-gray-900">Current Plan</h3>
+      <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Current Plan</h3>
         <div className="mt-4 flex items-center justify-between">
           <div>
-            <span className="text-2xl font-bold text-gray-900">
+            <span className="text-2xl font-bold text-gray-900 dark:text-white">
               {currentPlan?.name ?? 'Free'}
             </span>
-            <span className="ml-2 inline-block rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">
+            <span className="ml-2 inline-block rounded-full bg-blue-100 dark:bg-blue-900/30 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-400">
               {data.subscription?.status ?? 'active'}
             </span>
           </div>
@@ -187,14 +187,14 @@ export default function BillingPage() {
               <button
                 onClick={handleCancel}
                 disabled={canceling}
-                className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+                className="rounded-lg border border-red-300 dark:border-red-600 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 disabled:opacity-50"
               >
                 {canceling ? 'Canceling...' : 'Cancel Subscription'}
               </button>
             )}
         </div>
         {data.subscription?.current_period_end && (
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             {data.subscription.status === 'canceled'
               ? 'Access until: '
               : 'Renews on: '}
@@ -208,8 +208,8 @@ export default function BillingPage() {
       </section>
 
       {/* Usage */}
-      <section className="rounded-xl border border-gray-200 bg-white p-6">
-        <h3 className="text-lg font-semibold text-gray-900">Usage This Period</h3>
+      <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Usage This Period</h3>
         <div className="mt-4 space-y-4">
           <UsageGauge
             label="Messages"
@@ -233,14 +233,14 @@ export default function BillingPage() {
       {/* Plan Comparison */}
       <section>
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">Plans</h3>
-          <div className="flex items-center gap-2 rounded-lg bg-gray-100 p-1">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Plans</h3>
+          <div className="flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-700 p-1">
             <button
               onClick={() => setBillingInterval('monthly')}
               className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
                 billingInterval === 'monthly'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-500'
+                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400'
               }`}
             >
               Monthly
@@ -249,8 +249,8 @@ export default function BillingPage() {
               onClick={() => setBillingInterval('yearly')}
               className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
                 billingInterval === 'yearly'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-500'
+                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400'
               }`}
             >
               Yearly
@@ -290,8 +290,8 @@ export default function BillingPage() {
       </section>
 
       {/* Invoices */}
-      <section className="rounded-xl border border-gray-200 bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold text-gray-900">Invoices</h3>
+      <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6">
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Invoices</h3>
         <InvoiceList invoices={data.invoices} />
       </section>
     </div>

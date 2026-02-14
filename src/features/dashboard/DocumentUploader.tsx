@@ -69,21 +69,21 @@ export function DocumentUploader({ botId, onUploaded }: DocumentUploaderProps) {
         onDrop={handleDrop}
         className={`rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
           dragOver
-            ? 'border-blue-400 bg-blue-50'
-            : 'border-gray-300 hover:border-gray-400'
+            ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/30'
+            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
         }`}
       >
         {uploading ? (
           <div className="flex flex-col items-center gap-2">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-            <p className="text-sm text-gray-500">Uploading and processing...</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Uploading and processing...</p>
           </div>
         ) : (
           <>
-            <svg className="mx-auto h-10 w-10 text-gray-300" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+            <svg className="mx-auto h-10 w-10 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
             </svg>
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
               Drag & drop a file or{' '}
               <button
                 onClick={() => fileRef.current?.click()}
@@ -92,7 +92,7 @@ export function DocumentUploader({ botId, onUploaded }: DocumentUploaderProps) {
                 browse
               </button>
             </p>
-            <p className="mt-1 text-xs text-gray-400">PDF, HTML, or text files up to 10MB</p>
+            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">PDF, HTML, or text files up to 10MB</p>
           </>
         )}
       </div>
@@ -106,7 +106,7 @@ export function DocumentUploader({ botId, onUploaded }: DocumentUploaderProps) {
       />
 
       {error && (
-        <p className="mt-2 text-sm text-red-600">{error}</p>
+        <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
     </div>
   );

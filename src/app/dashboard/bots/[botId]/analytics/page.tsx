@@ -64,9 +64,9 @@ export default function AnalyticsPage() {
           <Link href={`/dashboard/bots/${botId}`} className="text-sm text-blue-600 hover:underline">
             &larr; Back to bot
           </Link>
-          <h2 className="mt-1 text-2xl font-bold text-gray-900">Analytics</h2>
+          <h2 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">Analytics</h2>
         </div>
-        <div className="flex rounded-lg border border-gray-300 bg-white">
+        <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900">
           {PERIODS.map((p) => (
             <button
               key={p.value}
@@ -74,7 +74,7 @@ export default function AnalyticsPage() {
               className={`px-3 py-1.5 text-sm font-medium ${
                 period === p.value
                   ? 'bg-blue-600 text-white'
-                  : 'text-gray-600 hover:bg-gray-50'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
               } first:rounded-l-lg last:rounded-r-lg`}
             >
               {p.label}
@@ -120,16 +120,16 @@ export default function AnalyticsPage() {
 
           {/* Language Distribution */}
           {stats.languageDistribution.length > 0 && (
-            <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6">
-              <h3 className="text-sm font-medium text-gray-700">Language Distribution</h3>
+            <div className="mt-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Language Distribution</h3>
               <div className="mt-3 flex flex-wrap gap-3">
                 {stats.languageDistribution.map((l) => (
                   <div
                     key={l.language}
-                    className="rounded-lg border border-gray-200 px-4 py-2 text-center"
+                    className="rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-center"
                   >
-                    <div className="text-lg font-bold text-gray-900">{l.count}</div>
-                    <div className="text-xs text-gray-500">{l.language.toUpperCase()}</div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-white">{l.count}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{l.language.toUpperCase()}</div>
                   </div>
                 ))}
               </div>
@@ -137,7 +137,7 @@ export default function AnalyticsPage() {
           )}
         </>
       ) : (
-        <p className="mt-12 text-center text-gray-500">Failed to load analytics.</p>
+        <p className="mt-12 text-center text-gray-500 dark:text-gray-400">Failed to load analytics.</p>
       )}
     </div>
   );
@@ -153,10 +153,10 @@ function KpiCard({
   sub?: string;
 }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5">
-      <div className="text-sm text-gray-500">{label}</div>
-      <div className="mt-1 text-2xl font-bold text-gray-900">{value}</div>
-      {sub && <div className="mt-0.5 text-xs text-gray-400">{sub}</div>}
+    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5">
+      <div className="text-sm text-gray-500 dark:text-gray-400">{label}</div>
+      <div className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{value}</div>
+      {sub && <div className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">{sub}</div>}
     </div>
   );
 }

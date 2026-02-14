@@ -101,8 +101,8 @@ export default function ApiKeysPage() {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">API Keys</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">API Keys</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Manage API keys for programmatic access (Pro plan required)
           </p>
         </div>
@@ -121,22 +121,22 @@ export default function ApiKeysPage() {
       {/* Create modal */}
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="mx-4 w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+          <div className="mx-4 w-full max-w-md rounded-xl bg-white dark:bg-gray-900 p-6 shadow-xl">
             {createdKey ? (
               <>
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   API Key Created
                 </h3>
-                <p className="mt-2 text-sm text-yellow-700 bg-yellow-50 rounded-lg p-3">
+                <p className="mt-2 text-sm text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-3">
                   Copy this key now. You won&apos;t be able to see it again.
                 </p>
                 <div className="mt-3 flex items-center gap-2">
-                  <code className="flex-1 rounded-lg bg-gray-100 px-3 py-2 text-sm font-mono break-all">
+                  <code className="flex-1 rounded-lg bg-gray-100 dark:bg-gray-700 px-3 py-2 text-sm font-mono break-all">
                     {createdKey}
                   </code>
                   <button
                     onClick={handleCopy}
-                    className="shrink-0 rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50"
+                    className="shrink-0 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
                     {copied ? 'Copied!' : 'Copy'}
                   </button>
@@ -153,11 +153,11 @@ export default function ApiKeysPage() {
               </>
             ) : (
               <>
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Create API Key
                 </h3>
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Key Name
                   </label>
                   <input
@@ -165,16 +165,16 @@ export default function ApiKeysPage() {
                     value={newKeyName}
                     onChange={(e) => setNewKeyName(e.target.value)}
                     placeholder="e.g., Production Server"
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 {error && (
-                  <p className="mt-2 text-sm text-red-600">{error}</p>
+                  <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>
                 )}
                 <div className="mt-4 flex justify-end gap-2">
                   <button
                     onClick={() => setShowCreate(false)}
-                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    className="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
                     Cancel
                   </button>
@@ -193,37 +193,37 @@ export default function ApiKeysPage() {
       )}
 
       {/* Keys table */}
-      <div className="mt-6 rounded-xl border border-gray-200 bg-white overflow-hidden">
+      <div className="mt-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden">
         {keys.length === 0 ? (
-          <div className="p-8 text-center text-sm text-gray-400">
+          <div className="p-8 text-center text-sm text-gray-400 dark:text-gray-500">
             No API keys created yet
           </div>
         ) : (
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50">
+            <thead className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th className="px-4 py-3 font-medium text-gray-600">Name</th>
-                <th className="px-4 py-3 font-medium text-gray-600">Key</th>
-                <th className="px-4 py-3 font-medium text-gray-600">Created</th>
-                <th className="px-4 py-3 font-medium text-gray-600">Last Used</th>
-                <th className="px-4 py-3 font-medium text-gray-600"></th>
+                <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Name</th>
+                <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Key</th>
+                <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Created</th>
+                <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Last Used</th>
+                <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {keys.map((key) => (
                 <tr key={key.id}>
-                  <td className="px-4 py-3 font-medium text-gray-900">
+                  <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">
                     {key.name}
                   </td>
                   <td className="px-4 py-3">
-                    <code className="rounded bg-gray-100 px-2 py-0.5 text-xs font-mono">
+                    <code className="rounded bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs font-mono">
                       {key.key_prefix}...
                     </code>
                   </td>
-                  <td className="px-4 py-3 text-gray-500">
+                  <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
                     {new Date(key.created_at).toLocaleDateString()}
                   </td>
-                  <td className="px-4 py-3 text-gray-500">
+                  <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
                     {key.last_used_at
                       ? new Date(key.last_used_at).toLocaleDateString()
                       : 'Never'}
@@ -231,7 +231,7 @@ export default function ApiKeysPage() {
                   <td className="px-4 py-3 text-right">
                     <button
                       onClick={() => handleDelete(key.id)}
-                      className="text-sm text-red-600 hover:text-red-800"
+                      className="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
                     >
                       Revoke
                     </button>

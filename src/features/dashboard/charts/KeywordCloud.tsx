@@ -8,11 +8,11 @@ export function KeywordCloud({ data }: Props) {
   const maxCount = Math.max(...data.map((d) => d.count), 1);
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6">
-      <h3 className="text-sm font-medium text-gray-700">Top Keywords</h3>
+    <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 p-6">
+      <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Top Keywords</h3>
       <div className="mt-4">
         {data.length === 0 ? (
-          <div className="flex h-32 items-center justify-center text-sm text-gray-400">
+          <div className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
             No keyword data yet
           </div>
         ) : (
@@ -24,11 +24,11 @@ export function KeywordCloud({ data }: Props) {
               return (
                 <span
                   key={item.keyword}
-                  className={`inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-blue-700 ${size} ${weight}`}
+                  className={`inline-flex items-center gap-1 rounded-full bg-blue-50 dark:bg-blue-900/30 px-3 py-1 text-blue-700 dark:text-blue-400 ${size} ${weight}`}
                   title={`${item.count} occurrences`}
                 >
                   {item.keyword}
-                  <span className="text-xs text-blue-400">{item.count}</span>
+                  <span className="text-xs text-blue-400 dark:text-blue-300">{item.count}</span>
                 </span>
               );
             })}

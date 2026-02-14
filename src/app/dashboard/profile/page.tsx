@@ -121,16 +121,16 @@ export default function ProfilePage() {
   }
 
   if (!profile) {
-    return <p className="py-12 text-center text-gray-500">Failed to load profile</p>;
+    return <p className="py-12 text-center text-gray-500 dark:text-gray-400">Failed to load profile</p>;
   }
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900">Profile</h2>
-      <p className="mt-1 text-sm text-gray-500">Manage your account settings</p>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Profile</h2>
+      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage your account settings</p>
 
       <div className="mt-6 max-w-lg">
-        <div className="rounded-xl border border-gray-200 bg-white p-6">
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6">
           {/* Avatar */}
           <div className="flex items-center gap-4">
             <div className="relative">
@@ -141,13 +141,13 @@ export default function ProfilePage() {
                   className="h-16 w-16 rounded-full object-cover"
                 />
               ) : (
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-xl font-bold text-blue-600">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-xl font-bold text-blue-600 dark:text-blue-400">
                   {(fullName || profile.email).charAt(0).toUpperCase()}
                 </div>
               )}
             </div>
             <div>
-              <label className="cursor-pointer rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
+              <label className="cursor-pointer rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
                 {uploading ? 'Uploading...' : 'Change Avatar'}
                 <input
                   type="file"
@@ -161,57 +161,57 @@ export default function ProfilePage() {
 
           {/* Email (read-only) */}
           <div className="mt-6">
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
             <input
               type="email"
               value={profile.email}
               disabled
-              className="mt-1 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-500"
+              className="mt-1 w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm text-gray-500 dark:text-gray-400"
             />
           </div>
 
           {/* Full Name */}
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Full Name
             </label>
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
             />
           </div>
 
           {/* Account info */}
-          <div className="mt-4 rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-500">
+          <div className="mt-4 rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
             Member since {new Date(profile.created_at).toLocaleDateString()}
           </div>
         </div>
 
         {/* Password change */}
-        <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6">
-          <h3 className="text-sm font-medium text-gray-900">Change Password</h3>
+        <div className="mt-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6">
+          <h3 className="text-sm font-medium text-gray-900 dark:text-white">Change Password</h3>
           <div className="mt-4 space-y-3">
             <div>
-              <label className="block text-sm text-gray-600">New Password</label>
+              <label className="block text-sm text-gray-600 dark:text-gray-400">New Password</label>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Min 6 characters"
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-600">
+              <label className="block text-sm text-gray-600 dark:text-gray-400">
                 Confirm Password
               </label>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
               />
             </div>
           </div>
@@ -222,8 +222,8 @@ export default function ProfilePage() {
           <p
             className={`mt-4 text-sm ${
               message.includes('success')
-                ? 'text-green-600'
-                : 'text-red-600'
+                ? 'text-green-600 dark:text-green-400'
+                : 'text-red-600 dark:text-red-400'
             }`}
           >
             {message}

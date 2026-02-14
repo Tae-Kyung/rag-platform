@@ -30,17 +30,17 @@ export function ChannelCard({
   return (
     <div
       className={`rounded-xl border p-6 ${
-        isLocked ? 'border-gray-200 bg-gray-50 opacity-60' : 'border-gray-200 bg-white'
+        isLocked ? 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800 opacity-60' : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900'
       }`}
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700">
             {icon}
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">{name}</h3>
-            <p className="text-sm text-gray-500">{description}</p>
+            <h3 className="font-semibold text-gray-900 dark:text-white">{name}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>
           </div>
         </div>
         {isConnected && !isLocked && (
@@ -49,7 +49,7 @@ export function ChannelCard({
               <button
                 onClick={() => onToggle(!isActive)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
-                  isActive ? 'bg-blue-600' : 'bg-gray-300'
+                  isActive ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
                 }`}
               >
                 <span
@@ -61,7 +61,7 @@ export function ChannelCard({
             )}
             <span
               className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                isActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
               }`}
             >
               {isActive ? 'Active' : 'Inactive'}
@@ -71,7 +71,7 @@ export function ChannelCard({
       </div>
 
       {isLocked && lockedMessage && (
-        <div className="mt-3 rounded-lg bg-yellow-50 px-3 py-2 text-sm text-yellow-700">
+        <div className="mt-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/30 px-3 py-2 text-sm text-yellow-700 dark:text-yellow-400">
           {lockedMessage}
         </div>
       )}
@@ -84,7 +84,7 @@ export function ChannelCard({
               {onDisconnect && (
                 <button
                   onClick={onDisconnect}
-                  className="mt-4 rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50"
+                  className="mt-4 rounded-lg border border-red-300 dark:border-red-600 px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
                 >
                   Disconnect
                 </button>

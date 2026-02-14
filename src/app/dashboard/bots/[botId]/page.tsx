@@ -27,6 +27,7 @@ export default function BotDetailPage() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [tab, setTab] = useState<'settings' | 'knowledge'>('settings');
+  const [idCopied, setIdCopied] = useState(false);
 
   useEffect(() => {
     async function fetchBot() {
@@ -83,6 +84,21 @@ export default function BotDetailPage() {
             &larr; Back to bots
           </Link>
           <h2 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{bot.name}</h2>
+          <div className="mt-1 flex items-center gap-1.5">
+            <span className="text-xs text-gray-400 dark:text-gray-500">Bot ID:</span>
+            <code className="text-xs font-mono text-gray-500 dark:text-gray-400">{botId}</code>
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(botId).catch(() => {});
+                setIdCopied(true);
+                setTimeout(() => setIdCopied(false), 2000);
+              }}
+              className="rounded px-1.5 py-0.5 text-xs text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+            >
+              {idCopied ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <span

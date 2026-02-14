@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { LogoutButton } from '@/app/dashboard/LogoutButton';
 import ThemeToggle from '@/components/ThemeToggle';
+import MobileDrawer from '@/components/MobileDrawer';
 
 export default async function AdminLayout({
   children,
@@ -76,9 +77,33 @@ export default async function AdminLayout({
       <div className="flex flex-1 flex-col">
         <header className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 px-6 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 md:hidden">
-              <Link href="/admin" className="text-xl font-bold text-gray-900 dark:text-white">AskDocs</Link>
-              <span className="rounded bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 text-xs font-medium text-red-700 dark:text-red-400">Admin</span>
+            <div className="flex items-center gap-2">
+              <MobileDrawer>
+                <nav className="flex-1 space-y-1 p-4">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="flex items-center rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                    >
+                      <svg className="mr-3 h-5 w-5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+                      </svg>
+                      {item.label}
+                    </Link>
+                  ))}
+                </nav>
+                <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 truncate">{displayName}</div>
+                  <Link href="/dashboard" className="mt-1 block text-xs text-blue-600 hover:underline">
+                    Back to Dashboard
+                  </Link>
+                </div>
+              </MobileDrawer>
+              <div className="flex items-center gap-2 md:hidden">
+                <Link href="/admin" className="text-xl font-bold text-gray-900 dark:text-white">AskDocs</Link>
+                <span className="rounded bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 text-xs font-medium text-red-700 dark:text-red-400">Admin</span>
+              </div>
             </div>
             <div className="ml-auto flex items-center gap-4">
               <ThemeToggle />

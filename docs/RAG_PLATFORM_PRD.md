@@ -618,6 +618,8 @@ CREATE POLICY "Bot owners read messages" ON messages FOR SELECT
 
 ### 7.2 Owner 대시보드 (`/dashboard/*`)
 
+> **반응형:** 모바일에서 사이드바는 햄버거 메뉴 → 슬라이드 드로어로 전환. Admin 대시보드도 동일 패턴.
+
 | 페이지 | 경로 | 설명 |
 |--------|------|------|
 | 홈 | `/dashboard` | 전체 봇 요약, 사용량, 알림 |

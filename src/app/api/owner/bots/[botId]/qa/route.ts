@@ -71,23 +71,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const supabase = createServiceRoleClient();
 
-    // Create Q&A pair
-    const { data: qaPair, error: qaError } = await supabase
-      .from('qa_pairs')
-      .insert({
-        bot_id: botId,
-        question,
-        answer,
-        category: category || null,
-      })
-      .select()
-      .single();
-
-    if (qaError) {
-      return errorResponse(`Failed to create Q&A: ${qaError.message}`, 500);
-    }
-
-    // Create document record for RAG
+    // Create document record first (so we have the ID for FK)
     const { data: doc, error: docError } = await supabase
       .from('documents')
       .insert({
@@ -100,7 +84,26 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (docError || !doc) {
-      return successResponse(qaPair, 201); // Q&A saved, embedding failed silently
+      return errorResponse(`Failed to create document: ${docError?.message}`, 500);
+    }
+
+    // Create Q&A pair with document_id FK
+    const { data: qaPair, error: qaError } = await supabase
+      .from('qa_pairs')
+      .insert({
+        bot_id: botId,
+        question,
+        answer,
+        category: category || null,
+        document_id: doc.id,
+      })
+      .select()
+      .single();
+
+    if (qaError) {
+      // Clean up the document if qa_pair insert fails
+      await supabase.from('documents').delete().eq('id', doc.id);
+      return errorResponse(`Failed to create Q&A: ${qaError.message}`, 500);
     }
 
     // Track document usage
@@ -186,30 +189,39 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     const supabase = createServiceRoleClient();
 
-    // Delete Q&A pair
-    const { error } = await supabase
+    // Find the linked document via document_id FK
+    const { data: qaPair } = await supabase
       .from('qa_pairs')
-      .delete()
+      .select('document_id')
       .eq('id', qaId)
-      .eq('bot_id', botId);
+      .eq('bot_id', botId)
+      .single();
 
-    if (error) {
-      return errorResponse(`Failed to delete Q&A: ${error.message}`, 500);
+    if (!qaPair) {
+      return errorResponse('Q&A pair not found', 404);
     }
 
-    // Delete associated Q&A documents and chunks
-    const { data: docs } = await supabase
-      .from('documents')
-      .select('id')
-      .eq('bot_id', botId)
-      .eq('file_type', 'qa')
-      .ilike('file_name', `%${qaId.substring(0, 8)}%`);
-
-    if (docs && docs.length > 0) {
-      await supabase
+    if (qaPair.document_id) {
+      // Delete document → CASCADE deletes qa_pair + document_chunks
+      const { error } = await supabase
         .from('documents')
         .delete()
-        .in('id', docs.map((d) => d.id));
+        .eq('id', qaPair.document_id);
+
+      if (error) {
+        return errorResponse(`Failed to delete: ${error.message}`, 500);
+      }
+    } else {
+      // Legacy: no document_id linked, delete qa_pair directly
+      const { error } = await supabase
+        .from('qa_pairs')
+        .delete()
+        .eq('id', qaId)
+        .eq('bot_id', botId);
+
+      if (error) {
+        return errorResponse(`Failed to delete Q&A: ${error.message}`, 500);
+      }
     }
 
     return successResponse({ deleted: true });

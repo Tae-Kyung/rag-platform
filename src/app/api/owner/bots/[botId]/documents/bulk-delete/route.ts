@@ -41,7 +41,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       await supabase.storage.from('documents').remove(storagePaths);
     }
 
-    // Delete documents (CASCADE deletes chunks)
+    // Delete documents (CASCADE deletes chunks + qa_pairs via document_id FK)
     const { error } = await supabase
       .from('documents')
       .delete()
@@ -51,14 +51,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     if (error) {
       return errorResponse(`Failed to delete documents: ${error.message}`, 500);
     }
-
-    // Also delete associated qa_pairs if any
-    // Q&A documents have file_type='qa' and file_name starts with 'Q&A:'
-    await supabase
-      .from('qa_pairs')
-      .delete()
-      .eq('bot_id', botId)
-      .in('id', ids);
 
     return successResponse({ deleted: ids.length });
   } catch (err) {

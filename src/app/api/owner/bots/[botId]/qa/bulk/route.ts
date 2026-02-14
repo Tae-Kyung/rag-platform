@@ -57,23 +57,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const supabase = createServiceRoleClient();
 
-    // --- Phase 1: Batch insert all qa_pairs ---
-    const qaPairsToInsert = items.map((item) => ({
-      bot_id: botId,
-      question: item.question.trim(),
-      answer: item.answer.trim(),
-      category: item.category?.trim() || null,
-    }));
-
-    const { error: qaInsertError } = await supabase
-      .from('qa_pairs')
-      .insert(qaPairsToInsert);
-
-    if (qaInsertError) {
-      return errorResponse(`Failed to insert Q&A pairs: ${qaInsertError.message}`, 500);
-    }
-
-    // --- Phase 2: Batch insert all document records ---
+    // --- Phase 1: Batch insert all document records first (for FK) ---
     const docsToInsert = items.map((item) => ({
       bot_id: botId,
       file_name: `Q&A: ${item.question.trim().substring(0, 50)}`,
@@ -88,6 +72,25 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     if (docsInsertError || !docs) {
       return errorResponse(`Failed to create document records: ${docsInsertError?.message}`, 500);
+    }
+
+    // --- Phase 2: Batch insert all qa_pairs with document_id FK ---
+    const qaPairsToInsert = items.map((item, i) => ({
+      bot_id: botId,
+      question: item.question.trim(),
+      answer: item.answer.trim(),
+      category: item.category?.trim() || null,
+      document_id: docs[i].id,
+    }));
+
+    const { error: qaInsertError } = await supabase
+      .from('qa_pairs')
+      .insert(qaPairsToInsert);
+
+    if (qaInsertError) {
+      // Clean up documents if qa_pairs insert fails
+      await supabase.from('documents').delete().in('id', docs.map((d) => d.id));
+      return errorResponse(`Failed to insert Q&A pairs: ${qaInsertError.message}`, 500);
     }
 
     // Track usage

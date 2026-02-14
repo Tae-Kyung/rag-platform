@@ -340,6 +340,7 @@ export type Database = {
           question: string;
           answer: string;
           category: string | null;
+          document_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -349,6 +350,7 @@ export type Database = {
           question: string;
           answer: string;
           category?: string | null;
+          document_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -358,6 +360,7 @@ export type Database = {
           question?: string;
           answer?: string;
           category?: string | null;
+          document_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };

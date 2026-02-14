@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import ThemeToggle from '@/components/ThemeToggle';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -61,18 +62,19 @@ export default function DemoPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-sm px-6 py-4">
+      <header className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm px-6 py-4">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-gray-900">AskDocs</Link>
+          <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">AskDocs</Link>
           <nav className="hidden items-center gap-6 sm:flex">
-            <Link href="/pricing" className="text-sm text-gray-600 hover:text-gray-900">Pricing</Link>
-            <Link href="/docs" className="text-sm text-gray-600 hover:text-gray-900">Docs</Link>
-            <Link href="/demo" className="text-sm text-gray-600 hover:text-gray-900">Demo</Link>
+            <Link href="/pricing" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Pricing</Link>
+            <Link href="/docs" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Docs</Link>
+            <Link href="/demo" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Demo</Link>
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900">Log in</Link>
+            <ThemeToggle />
+            <Link href="/login" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Log in</Link>
             <Link href="/signup" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
               Get Started Free
             </Link>
@@ -83,16 +85,16 @@ export default function DemoPage() {
       {/* Content */}
       <div className="flex flex-1 flex-col items-center px-6 py-12">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Try AskDocs</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Try AskDocs</h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
             Chat with our demo bot to see how AskDocs-powered chatbots work.
           </p>
         </div>
 
         {/* Chat Window */}
-        <div className="mt-8 w-full max-w-2xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
+        <div className="mt-8 w-full max-w-2xl overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg">
           {/* Chat Header */}
-          <div className="border-b border-gray-200 bg-blue-600 px-4 py-3">
+          <div className="border-b border-gray-200 dark:border-gray-700 bg-blue-600 px-4 py-3">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-bold text-white">
                 A
@@ -105,14 +107,14 @@ export default function DemoPage() {
           </div>
 
           {/* Messages */}
-          <div className="h-96 overflow-y-auto px-4 py-4 space-y-3">
+          <div className="h-96 overflow-y-auto px-4 py-4 space-y-3 bg-white dark:bg-gray-800">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
                     msg.role === 'user'
                       ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-800'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
                   }`}
                 >
                   {msg.content}
@@ -121,7 +123,7 @@ export default function DemoPage() {
             ))}
             {typing && (
               <div className="flex justify-start">
-                <div className="rounded-2xl bg-gray-100 px-4 py-2.5 text-sm text-gray-500">
+                <div className="rounded-2xl bg-gray-100 dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400">
                   <span className="inline-flex gap-1">
                     <span className="animate-bounce">.</span>
                     <span className="animate-bounce" style={{ animationDelay: '0.1s' }}>.</span>
@@ -134,14 +136,14 @@ export default function DemoPage() {
           </div>
 
           {/* Quick Questions */}
-          <div className="border-t border-gray-100 px-4 py-2">
+          <div className="border-t border-gray-100 dark:border-gray-700 px-4 py-2">
             <div className="flex flex-wrap gap-1.5">
               {SAMPLE_QUESTIONS.map((q) => (
                 <button
                   key={q}
                   onClick={() => sendMessage(q)}
                   disabled={typing}
-                  className="rounded-full border border-gray-200 px-3 py-1 text-xs text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition"
+                  className="rounded-full border border-gray-200 dark:border-gray-600 px-3 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition"
                 >
                   {q}
                 </button>
@@ -150,7 +152,7 @@ export default function DemoPage() {
           </div>
 
           {/* Input */}
-          <div className="border-t border-gray-200 px-4 py-3">
+          <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -164,7 +166,7 @@ export default function DemoPage() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type a message..."
                 disabled={typing}
-                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-50"
+                className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-50 dark:disabled:bg-gray-800"
               />
               <button
                 type="submit"
@@ -179,7 +181,7 @@ export default function DemoPage() {
 
         {/* CTA */}
         <div className="mt-8 text-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             This is a demo with pre-defined answers. Real bots search your actual documents.
           </p>
           <Link

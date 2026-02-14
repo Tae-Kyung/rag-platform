@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const plans = [
   {
@@ -108,18 +109,19 @@ export default function PricingPage() {
   const [yearly, setYearly] = useState(false);
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-sm px-6 py-4">
+      <header className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm px-6 py-4">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-gray-900">AskDocs</Link>
+          <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">AskDocs</Link>
           <nav className="hidden items-center gap-6 sm:flex">
-            <Link href="/pricing" className="text-sm text-gray-600 hover:text-gray-900">Pricing</Link>
-            <Link href="/docs" className="text-sm text-gray-600 hover:text-gray-900">Docs</Link>
-            <Link href="/demo" className="text-sm text-gray-600 hover:text-gray-900">Demo</Link>
+            <Link href="/pricing" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Pricing</Link>
+            <Link href="/docs" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Docs</Link>
+            <Link href="/demo" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Demo</Link>
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900">Log in</Link>
+            <ThemeToggle />
+            <Link href="/login" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Log in</Link>
             <Link href="/signup" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
               Get Started Free
             </Link>
@@ -129,15 +131,15 @@ export default function PricingPage() {
 
       {/* Hero */}
       <section className="px-6 py-16 text-center">
-        <h1 className="text-4xl font-bold text-gray-900">Simple, Transparent Pricing</h1>
-        <p className="mt-3 text-lg text-gray-600">Start free, scale as you grow. No hidden fees.</p>
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Simple, Transparent Pricing</h1>
+        <p className="mt-3 text-lg text-gray-600 dark:text-gray-400">Start free, scale as you grow. No hidden fees.</p>
 
         {/* Toggle */}
-        <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-gray-200 bg-white px-4 py-2">
-          <span className={`text-sm font-medium ${!yearly ? 'text-gray-900' : 'text-gray-400'}`}>Monthly</span>
+        <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2">
+          <span className={`text-sm font-medium ${!yearly ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>Monthly</span>
           <button
             onClick={() => setYearly(!yearly)}
-            className={`relative h-6 w-11 rounded-full transition ${yearly ? 'bg-blue-600' : 'bg-gray-300'}`}
+            className={`relative h-6 w-11 rounded-full transition ${yearly ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}
           >
             <span
               className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
@@ -145,8 +147,8 @@ export default function PricingPage() {
               }`}
             />
           </button>
-          <span className={`text-sm font-medium ${yearly ? 'text-gray-900' : 'text-gray-400'}`}>
-            Yearly <span className="text-green-600">(Save ~17%)</span>
+          <span className={`text-sm font-medium ${yearly ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>
+            Yearly <span className="text-green-600 dark:text-green-400">(Save ~17%)</span>
           </span>
         </div>
       </section>
@@ -159,8 +161,8 @@ export default function PricingPage() {
               key={plan.id}
               className={`relative rounded-2xl border p-6 ${
                 plan.highlighted
-                  ? 'border-blue-600 bg-blue-50/50 shadow-lg shadow-blue-600/10'
-                  : 'border-gray-200 bg-white'
+                  ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-900/20 shadow-lg shadow-blue-600/10'
+                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
               }`}
             >
               {plan.highlighted && (
@@ -168,19 +170,19 @@ export default function PricingPage() {
                   Most Popular
                 </div>
               )}
-              <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
-              <p className="mt-1 text-sm text-gray-500">{plan.description}</p>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">{plan.name}</h3>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{plan.description}</p>
               <div className="mt-4">
                 {plan.monthlyPrice === -1 ? (
-                  <span className="text-3xl font-bold text-gray-900">Custom</span>
+                  <span className="text-3xl font-bold text-gray-900 dark:text-white">Custom</span>
                 ) : (
                   <>
-                    <span className="text-3xl font-bold text-gray-900">
+                    <span className="text-3xl font-bold text-gray-900 dark:text-white">
                       ${yearly ? Math.round(plan.yearlyPrice / 12) : plan.monthlyPrice}
                     </span>
-                    <span className="text-sm text-gray-500">/mo</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">/mo</span>
                     {yearly && plan.monthlyPrice > 0 && (
-                      <div className="mt-1 text-xs text-gray-400">
+                      <div className="mt-1 text-xs text-gray-400 dark:text-gray-500">
                         ${plan.yearlyPrice}/year
                       </div>
                     )}
@@ -192,14 +194,14 @@ export default function PricingPage() {
                 className={`mt-6 block rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition ${
                   plan.highlighted
                     ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                    : 'border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
                 {plan.cta}
               </Link>
               <ul className="mt-6 space-y-2.5">
                 {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
+                  <li key={f} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
                     <svg className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                     </svg>
@@ -213,9 +215,9 @@ export default function PricingPage() {
       </section>
 
       {/* FAQ */}
-      <section className="border-t border-gray-200 bg-gray-50 px-6 py-20">
+      <section className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-6 py-20">
         <div className="mx-auto max-w-3xl">
-          <h2 className="text-center text-2xl font-bold text-gray-900">Frequently Asked Questions</h2>
+          <h2 className="text-center text-2xl font-bold text-gray-900 dark:text-white">Frequently Asked Questions</h2>
           <div className="mt-10 space-y-4">
             {faqs.map((faq) => (
               <FaqItem key={faq.q} question={faq.q} answer={faq.a} />
@@ -225,7 +227,7 @@ export default function PricingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white px-6 py-8 text-center text-sm text-gray-400">
+      <footer className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-6 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
         &copy; {new Date().getFullYear()} AskDocs. All rights reserved.
       </footer>
     </div>
@@ -236,14 +238,14 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white">
+    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
       <button
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between px-5 py-4 text-left"
       >
-        <span className="text-sm font-medium text-gray-900">{question}</span>
+        <span className="text-sm font-medium text-gray-900 dark:text-white">{question}</span>
         <svg
-          className={`h-4 w-4 text-gray-400 transition ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 text-gray-400 dark:text-gray-500 transition ${open ? 'rotate-180' : ''}`}
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={2}
@@ -253,7 +255,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
         </svg>
       </button>
       {open && (
-        <div className="border-t border-gray-100 px-5 py-4 text-sm text-gray-600">
+        <div className="border-t border-gray-100 dark:border-gray-800 px-5 py-4 text-sm text-gray-600 dark:text-gray-400">
           {answer}
         </div>
       )}

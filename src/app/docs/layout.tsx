@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const navIcons = {
   home: 'M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25',
@@ -24,15 +25,15 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
   ];
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-sm px-6 py-4">
+      <header className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm px-6 py-4">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <div className="flex items-center gap-4">
             {/* Mobile menu button */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 lg:hidden"
+              className="rounded-md p-1.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden"
               aria-label="Toggle sidebar"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -43,20 +44,21 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
                 )}
               </svg>
             </button>
-            <Link href="/" className="text-xl font-bold text-gray-900">
+            <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">
               AskDocs
             </Link>
-            <span className="hidden text-sm text-gray-400 sm:inline">/</span>
-            <span className="hidden text-sm font-medium text-gray-600 sm:inline">{t('header.title')}</span>
+            <span className="hidden text-sm text-gray-400 dark:text-gray-500 sm:inline">/</span>
+            <span className="hidden text-sm font-medium text-gray-600 dark:text-gray-400 sm:inline">{t('header.title')}</span>
           </div>
           <nav className="hidden items-center gap-6 md:flex">
-            <Link href="/pricing" className="text-sm text-gray-600 hover:text-gray-900">Pricing</Link>
-            <Link href="/docs" className="text-sm text-gray-600 hover:text-gray-900">Docs</Link>
-            <Link href="/demo" className="text-sm text-gray-600 hover:text-gray-900">Demo</Link>
+            <Link href="/pricing" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Pricing</Link>
+            <Link href="/docs" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Docs</Link>
+            <Link href="/demo" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Demo</Link>
           </nav>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <LanguageSwitcher />
-            <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900">{t('header.login')}</Link>
+            <Link href="/login" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">{t('header.login')}</Link>
             <Link href="/signup" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
               {t('header.getStarted')}
             </Link>
@@ -66,7 +68,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
 
       <div className="mx-auto flex w-full max-w-6xl flex-1">
         {/* Sidebar - Desktop */}
-        <aside className="hidden w-56 shrink-0 border-r border-gray-200 lg:block">
+        <aside className="hidden w-56 shrink-0 border-r border-gray-200 dark:border-gray-700 lg:block">
           <nav className="sticky top-[65px] space-y-1 px-4 py-6">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
@@ -76,8 +78,8 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
                   href={item.href}
                   className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
                     isActive
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
                   }`}
                 >
                   <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -94,7 +96,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
         {sidebarOpen && (
           <>
             <div className="fixed inset-0 z-40 bg-black/20 lg:hidden" onClick={() => setSidebarOpen(false)} />
-            <aside className="fixed left-0 top-[57px] z-50 h-[calc(100vh-57px)] w-56 border-r border-gray-200 bg-white lg:hidden">
+            <aside className="fixed left-0 top-[57px] z-50 h-[calc(100vh-57px)] w-56 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 lg:hidden">
               <nav className="space-y-1 px-4 py-6">
                 {navItems.map((item) => {
                   const isActive = pathname === item.href;
@@ -105,8 +107,8 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
                       onClick={() => setSidebarOpen(false)}
                       className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
                         isActive
-                          ? 'bg-blue-50 text-blue-700'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
                       }`}
                     >
                       <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">

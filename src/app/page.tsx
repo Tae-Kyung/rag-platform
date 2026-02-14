@@ -1,45 +1,75 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { createClient } from '@/lib/supabase/server';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default async function LandingPage() {
   const t = await getTranslations('landing');
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let isAdmin = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    isAdmin = profile?.role === 'admin';
+  }
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-sm px-6 py-4">
+      <header className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm px-6 py-4">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-gray-900">
+          <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">
             AskDocs
           </Link>
           <nav className="hidden items-center gap-6 sm:flex">
-            <Link href="/pricing" className="text-sm text-gray-600 hover:text-gray-900">{t('nav.pricing')}</Link>
-            <Link href="/docs" className="text-sm text-gray-600 hover:text-gray-900">{t('nav.docs')}</Link>
-            <Link href="/demo" className="text-sm text-gray-600 hover:text-gray-900">{t('nav.demo')}</Link>
+            <Link href="/pricing" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">{t('nav.pricing')}</Link>
+            <Link href="/docs" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">{t('nav.docs')}</Link>
+            <Link href="/demo" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">{t('nav.demo')}</Link>
           </nav>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <LanguageSwitcher />
-            <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900">{t('nav.login')}</Link>
-            <Link href="/signup" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-              {t('getStarted')}
-            </Link>
+            {user ? (
+              <>
+                {isAdmin && (
+                  <Link href="/admin" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                    Admin
+                  </Link>
+                )}
+                <Link href="/dashboard" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                  Dashboard
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">{t('nav.login')}</Link>
+                <Link href="/signup" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                  {t('getStarted')}
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
 
       {/* Hero */}
       <section className="relative overflow-hidden px-6 py-24 sm:py-32">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-blue-50 to-white" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-blue-50 dark:from-blue-950/30 to-white dark:to-gray-900" />
         <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-6 inline-flex rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700">
+          <div className="mb-6 inline-flex rounded-full border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30 px-4 py-1.5 text-sm font-medium text-blue-700 dark:text-blue-400">
             {t('hero.badge')}
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+          <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
             {t('hero.titleStart')}
-            <span className="text-blue-600">{t('hero.titleHighlight')}</span>
+            <span className="text-blue-600 dark:text-blue-400">{t('hero.titleHighlight')}</span>
           </h1>
-          <p className="mt-6 text-lg leading-8 text-gray-600">
+          <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">
             {t('hero.description')}
           </p>
           <div className="mt-10 flex items-center justify-center gap-4">
@@ -51,12 +81,12 @@ export default async function LandingPage() {
             </Link>
             <Link
               href="/demo"
-              className="rounded-lg border border-gray-300 px-8 py-3.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 px-8 py-3.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
             >
               {t('hero.tryDemo')}
             </Link>
           </div>
-          <p className="mt-4 text-sm text-gray-400">{t('hero.noCreditCard')}</p>
+          <p className="mt-4 text-sm text-gray-400 dark:text-gray-500">{t('hero.noCreditCard')}</p>
         </div>
       </section>
 
@@ -64,8 +94,8 @@ export default async function LandingPage() {
       <section className="px-6 py-20">
         <div className="mx-auto max-w-6xl">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900">{t('features.title')}</h2>
-            <p className="mt-3 text-gray-600">{t('features.subtitle')}</p>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t('features.title')}</h2>
+            <p className="mt-3 text-gray-600 dark:text-gray-400">{t('features.subtitle')}</p>
           </div>
           <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <FeatureCard
@@ -93,11 +123,11 @@ export default async function LandingPage() {
       </section>
 
       {/* How It Works */}
-      <section className="bg-gray-50 px-6 py-20">
+      <section className="bg-gray-50 dark:bg-gray-800 px-6 py-20">
         <div className="mx-auto max-w-4xl">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900">{t('howItWorks.title')}</h2>
-            <p className="mt-3 text-gray-600">{t('howItWorks.subtitle')}</p>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t('howItWorks.title')}</h2>
+            <p className="mt-3 text-gray-600 dark:text-gray-400">{t('howItWorks.subtitle')}</p>
           </div>
           <div className="mt-16 grid gap-8 sm:grid-cols-3">
             <StepCard number={1} title={t('howItWorks.step1.title')} description={t('howItWorks.step1.description')} />
@@ -145,39 +175,39 @@ export default async function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white px-6 py-12">
+      <footer className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-6 py-12">
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-8 sm:grid-cols-4">
             <div>
-              <h3 className="text-sm font-semibold text-gray-900">AskDocs</h3>
-              <p className="mt-2 text-sm text-gray-500">{t('footer.tagline')}</p>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">AskDocs</h3>
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{t('footer.tagline')}</p>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-gray-900">{t('footer.product')}</h4>
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{t('footer.product')}</h4>
               <ul className="mt-2 space-y-2">
-                <li><Link href="/pricing" className="text-sm text-gray-500 hover:text-gray-700">{t('nav.pricing')}</Link></li>
-                <li><Link href="/docs" className="text-sm text-gray-500 hover:text-gray-700">{t('nav.docs')}</Link></li>
-                <li><Link href="/demo" className="text-sm text-gray-500 hover:text-gray-700">{t('nav.demo')}</Link></li>
+                <li><Link href="/pricing" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">{t('nav.pricing')}</Link></li>
+                <li><Link href="/docs" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">{t('nav.docs')}</Link></li>
+                <li><Link href="/demo" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">{t('nav.demo')}</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-gray-900">{t('footer.legal')}</h4>
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{t('footer.legal')}</h4>
               <ul className="mt-2 space-y-2">
-                <li><Link href="/privacy" className="text-sm text-gray-500 hover:text-gray-700">{t('footer.privacy')}</Link></li>
-                <li><Link href="/terms" className="text-sm text-gray-500 hover:text-gray-700">{t('footer.terms')}</Link></li>
-                <li><Link href="/refund" className="text-sm text-gray-500 hover:text-gray-700">{t('footer.refund')}</Link></li>
+                <li><Link href="/privacy" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">{t('footer.privacy')}</Link></li>
+                <li><Link href="/terms" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">{t('footer.terms')}</Link></li>
+                <li><Link href="/refund" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">{t('footer.refund')}</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-gray-900">{t('footer.account')}</h4>
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{t('footer.account')}</h4>
               <ul className="mt-2 space-y-2">
-                <li><Link href="/login" className="text-sm text-gray-500 hover:text-gray-700">{t('nav.login')}</Link></li>
-                <li><Link href="/signup" className="text-sm text-gray-500 hover:text-gray-700">{t('getStarted')}</Link></li>
-                <li><Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-700">Dashboard</Link></li>
+                <li><Link href="/login" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">{t('nav.login')}</Link></li>
+                <li><Link href="/signup" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">{t('getStarted')}</Link></li>
+                <li><Link href="/dashboard" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Dashboard</Link></li>
               </ul>
             </div>
           </div>
-          <div className="mt-8 border-t border-gray-200 pt-6 text-center text-sm text-gray-400">
+          <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6 text-center text-sm text-gray-400 dark:text-gray-500">
             {t('footer.copyright', { year: new Date().getFullYear().toString() })}
           </div>
         </div>
@@ -188,14 +218,14 @@ export default async function LandingPage() {
 
 function FeatureCard({ icon, title, description }: { icon: string; title: string; description: string }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6 transition hover:shadow-md">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 transition hover:shadow-md">
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
         </svg>
       </div>
-      <h3 className="mt-4 text-base font-semibold text-gray-900">{title}</h3>
-      <p className="mt-2 text-sm leading-6 text-gray-500">{description}</p>
+      <h3 className="mt-4 text-base font-semibold text-gray-900 dark:text-white">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">{description}</p>
     </div>
   );
 }
@@ -206,22 +236,22 @@ function StepCard({ number, title, description }: { number: number; title: strin
       <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white">
         {number}
       </div>
-      <h3 className="mt-4 text-base font-semibold text-gray-900">{title}</h3>
-      <p className="mt-2 text-sm text-gray-500">{description}</p>
+      <h3 className="mt-4 text-base font-semibold text-gray-900 dark:text-white">{title}</h3>
+      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{description}</p>
     </div>
   );
 }
 
 function TrustCard({ icon, title, description }: { icon: string; title: string; description: string }) {
   return (
-    <div className="rounded-xl bg-gray-50 p-6 text-center">
-      <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-green-50 text-green-600">
+    <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-6 text-center">
+      <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400">
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
         </svg>
       </div>
-      <h3 className="mt-4 text-sm font-semibold text-gray-900">{title}</h3>
-      <p className="mt-2 text-sm text-gray-500">{description}</p>
+      <h3 className="mt-4 text-sm font-semibold text-gray-900 dark:text-white">{title}</h3>
+      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{description}</p>
     </div>
   );
 }

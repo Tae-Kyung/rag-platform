@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
+import { ThemeProvider } from 'next-themes';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import './globals.css';
 
@@ -60,13 +61,15 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NextIntlClientProvider messages={messages}>
-          <ErrorBoundary>{children}</ErrorBoundary>
-        </NextIntlClientProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <NextIntlClientProvider messages={messages}>
+            <ErrorBoundary>{children}</ErrorBoundary>
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

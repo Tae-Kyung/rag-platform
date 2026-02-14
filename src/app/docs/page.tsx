@@ -1,18 +1,21 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { getLocale } from 'next-intl/server';
+import { getDocsContent } from './_content';
 
 export const metadata: Metadata = {
   title: 'Documentation - AskDocs',
-  description: 'AskDocs 사용 가이드 및 API 개발자 문서',
+  description: 'AskDocs documentation — user guides and API developer docs.',
 };
 
-export default function DocsHubPage() {
+export default async function DocsHubPage() {
+  const locale = await getLocale();
+  const c = getDocsContent('hub', locale);
+
   return (
     <div className="max-w-3xl">
-      <h1 className="text-3xl font-bold text-gray-900">Documentation</h1>
-      <p className="mt-3 text-gray-600">
-        AskDocs를 시작하는 데 필요한 모든 정보를 확인하세요. 웹사이트 사용법부터 API 연동까지 안내합니다.
-      </p>
+      <h1 className="text-3xl font-bold text-gray-900">{c.title}</h1>
+      <p className="mt-3 text-gray-600">{c.description}</p>
 
       {/* Guide Cards */}
       <div className="mt-10 grid gap-6 sm:grid-cols-2">
@@ -27,13 +30,11 @@ export default function DocsHubPage() {
             </svg>
           </div>
           <h2 className="mt-4 text-lg font-semibold text-gray-900 group-hover:text-blue-600">
-            사용자 가이드
+            {c.userGuide.title}
           </h2>
-          <p className="mt-2 text-sm text-gray-500">
-            회원가입, 봇 생성, 지식 추가, 채널 연결까지 AskDocs 웹사이트 사용법을 단계별로 안내합니다.
-          </p>
+          <p className="mt-2 text-sm text-gray-500">{c.userGuide.description}</p>
           <span className="mt-4 inline-flex items-center text-sm font-medium text-blue-600">
-            가이드 보기
+            {c.userGuide.link}
             <svg className="ml-1 h-4 w-4 transition group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
@@ -51,13 +52,11 @@ export default function DocsHubPage() {
             </svg>
           </div>
           <h2 className="mt-4 text-lg font-semibold text-gray-900 group-hover:text-blue-600">
-            개발자 가이드
+            {c.developerGuide.title}
           </h2>
-          <p className="mt-2 text-sm text-gray-500">
-            API Key 발급, Python/JavaScript 코드 예제, 엔드포인트 레퍼런스 등 API 연동에 필요한 모든 정보.
-          </p>
+          <p className="mt-2 text-sm text-gray-500">{c.developerGuide.description}</p>
           <span className="mt-4 inline-flex items-center text-sm font-medium text-blue-600">
-            API 문서 보기
+            {c.developerGuide.link}
             <svg className="ml-1 h-4 w-4 transition group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
@@ -67,16 +66,11 @@ export default function DocsHubPage() {
 
       {/* Quick Links */}
       <div className="mt-12">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400">빠른 링크</h3>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400">{c.quickLinks.title}</h3>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <QuickLink href="/docs/user-guide#getting-started" label="시작하기" description="회원가입 및 로그인" />
-          <QuickLink href="/docs/user-guide#create-bot" label="봇 만들기" description="첫 번째 챗봇 생성" />
-          <QuickLink href="/docs/user-guide#add-knowledge" label="지식 추가" description="PDF, 웹페이지, Q&A" />
-          <QuickLink href="/docs/user-guide#channels" label="채널 연결" description="웹 위젯, 텔레그램, 카카오톡" />
-          <QuickLink href="/docs/developer#quickstart" label="API 빠른 시작" description="3단계로 첫 API 호출" />
-          <QuickLink href="/docs/developer#code-examples" label="코드 예제" description="Python, JavaScript, cURL" />
-          <QuickLink href="/docs/developer#endpoints" label="엔드포인트 레퍼런스" description="전체 API 엔드포인트" />
-          <QuickLink href="/docs/developer#errors" label="에러 코드" description="에러 코드 및 Rate Limits" />
+          {c.quickLinks.items.map((item) => (
+            <QuickLink key={item.href} href={item.href} label={item.label} description={item.description} />
+          ))}
         </div>
       </div>
     </div>

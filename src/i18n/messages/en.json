@@ -41,10 +41,102 @@
     "noBots": "You haven't created any bots yet.",
     "createBot": "Create your first bot"
   },
+  "docs": {
+    "nav": {
+      "home": "Docs Home",
+      "userGuide": "User Guide",
+      "developer": "Developer Guide"
+    },
+    "header": {
+      "title": "Documentation",
+      "login": "Log in",
+      "getStarted": "Get Started Free"
+    }
+  },
   "landing": {
     "title": "AskDocs",
     "subtitle": "Build AI-powered knowledge bots from your documents",
     "getStarted": "Get Started Free",
-    "learnMore": "Learn More"
+    "learnMore": "Learn More",
+    "nav": {
+      "pricing": "Pricing",
+      "docs": "Docs",
+      "demo": "Demo",
+      "login": "Log in"
+    },
+    "hero": {
+      "badge": "RAG-as-a-Service Platform",
+      "titleStart": "Turn Your Documents Into",
+      "titleHighlight": " AI Chatbots",
+      "description": "Upload PDFs, crawl websites, add Q&A pairs — AskDocs builds an intelligent chatbot with RAG-powered answers in minutes. Deploy on your website, Telegram, or via API.",
+      "startFree": "Start Free",
+      "tryDemo": "Try Demo",
+      "noCreditCard": "No credit card required"
+    },
+    "features": {
+      "title": "Everything You Need",
+      "subtitle": "Build, deploy, and manage AI chatbots with zero infrastructure.",
+      "setup": {
+        "title": "5-Minute Setup",
+        "description": "Upload documents and your chatbot is ready. No coding, no configuration headaches."
+      },
+      "multiChannel": {
+        "title": "Multi-Channel",
+        "description": "Deploy on your website via widget, connect Telegram bots, or integrate through our REST API."
+      },
+      "ragSearch": {
+        "title": "Powerful RAG Search",
+        "description": "Hybrid vector + keyword search with automatic language detection and HyDE query expansion."
+      },
+      "pricing": {
+        "title": "Transparent Pricing",
+        "description": "Start free, scale as you grow. No hidden fees, no per-query charges."
+      }
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "subtitle": "Three simple steps to your AI chatbot.",
+      "step1": {
+        "title": "Sign Up & Create Bot",
+        "description": "Create a free account and set up your first bot with a name and system prompt."
+      },
+      "step2": {
+        "title": "Upload Knowledge",
+        "description": "Upload PDFs, crawl web pages, or add Q&A pairs. We handle chunking, embedding, and indexing."
+      },
+      "step3": {
+        "title": "Deploy Anywhere",
+        "description": "Embed the widget on your site, connect Telegram, or use the REST API for custom integrations."
+      }
+    },
+    "trust": {
+      "secure": {
+        "title": "Secure by Design",
+        "description": "Row-level security, encrypted storage, and data isolation between tenants."
+      },
+      "dataControl": {
+        "title": "Your Data, Your Control",
+        "description": "All documents and conversations stay in your isolated database. Delete anytime."
+      },
+      "scale": {
+        "title": "Built for Scale",
+        "description": "Powered by Supabase, OpenAI, and Vercel. Enterprise-ready infrastructure."
+      }
+    },
+    "cta": {
+      "title": "Ready to Build Your AI Chatbot?",
+      "subtitle": "Join thousands of businesses using AskDocs to deliver instant, accurate answers.",
+      "button": "Start Free Today"
+    },
+    "footer": {
+      "tagline": "AI chatbots from your documents.",
+      "product": "Product",
+      "legal": "Legal",
+      "account": "Account",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "refund": "Refund Policy",
+      "copyright": "© {year} AskDocs. All rights reserved."
+    }
   }
 }

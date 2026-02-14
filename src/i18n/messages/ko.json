@@ -41,10 +41,102 @@
     "noBots": "아직 생성된 봇이 없습니다.",
     "createBot": "첫 번째 봇 만들기"
   },
+  "docs": {
+    "nav": {
+      "home": "문서 홈",
+      "userGuide": "사용자 가이드",
+      "developer": "개발자 가이드"
+    },
+    "header": {
+      "title": "문서",
+      "login": "로그인",
+      "getStarted": "무료로 시작하기"
+    }
+  },
   "landing": {
     "title": "AskDocs",
     "subtitle": "문서 기반 AI 지식 봇을 만들어 보세요",
     "getStarted": "무료로 시작하기",
-    "learnMore": "자세히 보기"
+    "learnMore": "자세히 보기",
+    "nav": {
+      "pricing": "요금제",
+      "docs": "문서",
+      "demo": "데모",
+      "login": "로그인"
+    },
+    "hero": {
+      "badge": "RAG 서비스 플랫폼",
+      "titleStart": "문서를 AI 챗봇으로",
+      "titleHighlight": " 변환하세요",
+      "description": "PDF 업로드, 웹사이트 크롤링, Q&A 추가 — AskDocs가 RAG 기반의 지능형 챗봇을 몇 분 만에 구축합니다. 웹사이트, 텔레그램, API로 배포하세요.",
+      "startFree": "무료로 시작",
+      "tryDemo": "데모 체험",
+      "noCreditCard": "신용카드 불필요"
+    },
+    "features": {
+      "title": "필요한 모든 것",
+      "subtitle": "인프라 없이 AI 챗봇을 구축, 배포, 관리하세요.",
+      "setup": {
+        "title": "5분 만에 설정",
+        "description": "문서를 업로드하면 챗봇이 준비됩니다. 코딩도, 복잡한 설정도 필요 없습니다."
+      },
+      "multiChannel": {
+        "title": "멀티 채널",
+        "description": "웹사이트 위젯, 텔레그램 봇, REST API 등 다양한 채널로 배포하세요."
+      },
+      "ragSearch": {
+        "title": "강력한 RAG 검색",
+        "description": "벡터 + 키워드 하이브리드 검색, 자동 언어 감지, HyDE 쿼리 확장을 지원합니다."
+      },
+      "pricing": {
+        "title": "투명한 요금제",
+        "description": "무료로 시작하고 성장에 맞게 확장하세요. 숨겨진 비용이 없습니다."
+      }
+    },
+    "howItWorks": {
+      "title": "사용 방법",
+      "subtitle": "간단한 3단계로 AI 챗봇을 만드세요.",
+      "step1": {
+        "title": "가입 & 봇 생성",
+        "description": "무료 계정을 만들고 이름과 시스템 프롬프트로 첫 번째 봇을 설정하세요."
+      },
+      "step2": {
+        "title": "지식 업로드",
+        "description": "PDF 업로드, 웹 크롤링, Q&A 추가. 청킹, 임베딩, 인덱싱은 자동으로 처리됩니다."
+      },
+      "step3": {
+        "title": "어디서나 배포",
+        "description": "사이트에 위젯을 삽입하거나, 텔레그램을 연결하거나, REST API를 활용하세요."
+      }
+    },
+    "trust": {
+      "secure": {
+        "title": "보안 설계",
+        "description": "행 수준 보안, 암호화 저장, 테넌트 간 데이터 격리를 제공합니다."
+      },
+      "dataControl": {
+        "title": "데이터 주권",
+        "description": "모든 문서와 대화는 격리된 데이터베이스에 저장됩니다. 언제든 삭제 가능합니다."
+      },
+      "scale": {
+        "title": "확장 가능한 아키텍처",
+        "description": "Supabase, OpenAI, Vercel 기반. 엔터프라이즈 수준의 인프라입니다."
+      }
+    },
+    "cta": {
+      "title": "AI 챗봇을 만들 준비가 되셨나요?",
+      "subtitle": "수천 개의 기업이 AskDocs로 즉각적이고 정확한 답변을 제공하고 있습니다.",
+      "button": "지금 무료로 시작하기"
+    },
+    "footer": {
+      "tagline": "문서 기반 AI 챗봇.",
+      "product": "제품",
+      "legal": "법적 고지",
+      "account": "계정",
+      "privacy": "개인정보처리방침",
+      "terms": "이용약관",
+      "refund": "환불 정책",
+      "copyright": "© {year} AskDocs. All rights reserved."
+    }
   }
 }

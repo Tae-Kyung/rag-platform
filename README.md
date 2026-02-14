@@ -12,6 +12,8 @@ AskDocs는 문서를 업로드하면 5분 만에 AI 챗봇을 생성하고, 다�
 - **스트리밍 응답** — SSE 기반 실시간 응답
 - **분석 대시보드** — 대화 트렌드, 자주 묻는 질문, 채널별 통계
 - **다국어 지원** — 한국어, 영어 (자동 언어 감지)
+- **다크 모드** — 전체 페이지 다크/라이트 테마 전환 (next-themes)
+- **Docs 허브** — 사용자 가이드 + 개발자 API 가이드
 - **구독 과금** — Paddle 기반 월간/연간 구독 (Free, Starter, Pro, Enterprise)
 
 ## Tech Stack
@@ -25,7 +27,8 @@ AskDocs는 문서를 업로드하면 5분 만에 AI 챗봇을 생성하고, 다�
 | Embeddings | text-embedding-3-small (1536차원) |
 | Payments | Paddle |
 | i18n | next-intl (ko, en) |
-| Testing | Vitest, Testing Library |
+| Theme | next-themes (dark/light mode) |
+| Testing | Vitest (98 tests), Testing Library |
 | Deployment | Vercel |
 
 ## Getting Started
@@ -160,7 +163,7 @@ src/
 ├── lib/                 # 핵심 비즈니스 로직
 │   ├── auth/            # 인증 가드, API 키, Rate Limit
 │   ├── billing/         # Paddle 결제, 사용량 추적
-│   ├── channels/        # Telegram 등 채널 통합
+│   ├── channels/        # Telegram, KakaoTalk 채널 통합
 │   ├── rag/             # RAG 파이프라인 (청킹, 임베딩, 검색)
 │   └── supabase/        # Supabase 클라이언트
 ├── features/            # 도메인별 컴포넌트

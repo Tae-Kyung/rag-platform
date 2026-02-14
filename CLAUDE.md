@@ -7,7 +7,7 @@ AskDocs is a RAG-as-a-Service SaaS platform. Users upload documents (PDF, URL, Q
 ## Tech Stack
 
 - **Framework:** Next.js 16 (App Router) + React 19 + TypeScript 5
-- **Styling:** Tailwind CSS 4
+- **Styling:** Tailwind CSS 4 + next-themes (dark/light mode)
 - **State:** Zustand 5
 - **Auth & DB:** Supabase (PostgreSQL + pgvector + Auth + Storage)
 - **LLM:** OpenAI API (GPT-4o-mini default, GPT-4o, Claude for paid)
@@ -29,14 +29,14 @@ src/
 │   │   ├── owner/          # Owner CRUD APIs (bots, docs, billing)
 │   │   ├── sys/            # System admin APIs
 │   │   ├── v1/             # Public REST API (API key auth)
-│   │   └── webhooks/       # Paddle & Telegram webhooks
+│   │   └── webhooks/       # Paddle, Telegram & KakaoTalk webhooks
 │   ├── dashboard/          # Owner dashboard pages
 │   ├── chat/               # Chat interface
 │   └── widget/             # Embeddable widget
 ├── lib/                    # Core business logic
 │   ├── auth/               # Guards, API key validation, rate limiting
 │   ├── billing/            # Paddle integration, usage tracking, plan guards
-│   ├── channels/           # Telegram handler & API
+│   ├── channels/           # Telegram & KakaoTalk handlers & API
 │   ├── chat/               # Chat history, sources, dedup
 │   ├── openai/             # OpenAI client
 │   ├── rag/                # RAG pipeline (chunker, embeddings, parser, search)
@@ -86,13 +86,14 @@ See `.env.example`. Required:
 - **Streaming chat**: SSE-based streaming via `useStreamChat` hook; API routes return `text/event-stream`
 - **RLS policies** (`supabase/migrations/00002_rls_policies.sql`): All user data protected by Supabase Row-Level Security
 - **API auth**: Owner endpoints use Supabase session; `/v1/*` endpoints use Bearer API key from `api_keys` table
+- **Dark mode**: `next-themes` ThemeProvider + Tailwind `dark:` variant classes; `ThemeToggle` component in all layouts
 
 ## Database
 
 PostgreSQL via Supabase with pgvector extension. Key tables:
 - `profiles`, `plans`, `subscriptions`, `usage_records`
 - `bots`, `documents`, `document_chunks` (with `embedding vector(1536)`)
-- `conversations`, `messages`, `api_keys`, `telegram_chat_mappings`
+- `conversations`, `messages`, `api_keys`, `channel_configs`, `telegram_chat_mappings`
 
 Migrations are in `supabase/migrations/` (run in order 00001–00006).
 

@@ -4,10 +4,9 @@ import { successResponse, errorResponse } from '@/lib/api/response';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 import { checkDocumentLimit } from '@/lib/billing/plan-guard';
 import { incrementDocumentCount } from '@/lib/billing/usage';
-import { generateEmbedding, generateEmbeddings } from '@/lib/rag/embeddings';
-import { chunkText } from '@/lib/rag/chunker';
+import { generateEmbeddings } from '@/lib/rag/embeddings';
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 interface QAItem {
   question: string;
@@ -57,107 +56,109 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     const supabase = createServiceRoleClient();
-    const results: { success: number; failed: number; errors: string[] } = {
-      success: 0,
-      failed: 0,
-      errors: [],
-    };
 
-    for (const item of items) {
-      try {
-        const question = item.question.trim();
-        const answer = item.answer.trim();
-        const category = item.category?.trim() || null;
+    // --- Phase 1: Batch insert all qa_pairs ---
+    const qaPairsToInsert = items.map((item) => ({
+      bot_id: botId,
+      question: item.question.trim(),
+      answer: item.answer.trim(),
+      category: item.category?.trim() || null,
+    }));
 
-        // Create Q&A pair
-        const { error: qaError } = await supabase
-          .from('qa_pairs')
-          .insert({ bot_id: botId, question, answer, category });
+    const { error: qaInsertError } = await supabase
+      .from('qa_pairs')
+      .insert(qaPairsToInsert);
 
-        if (qaError) {
-          results.failed++;
-          results.errors.push(`"${question.substring(0, 30)}...": ${qaError.message}`);
-          continue;
-        }
+    if (qaInsertError) {
+      return errorResponse(`Failed to insert Q&A pairs: ${qaInsertError.message}`, 500);
+    }
 
-        // Create document record
-        const { data: doc, error: docError } = await supabase
+    // --- Phase 2: Batch insert all document records ---
+    const docsToInsert = items.map((item) => ({
+      bot_id: botId,
+      file_name: `Q&A: ${item.question.trim().substring(0, 50)}`,
+      file_type: 'qa' as const,
+      status: 'processing' as const,
+    }));
+
+    const { data: docs, error: docsInsertError } = await supabase
+      .from('documents')
+      .insert(docsToInsert)
+      .select('id');
+
+    if (docsInsertError || !docs) {
+      return errorResponse(`Failed to create document records: ${docsInsertError?.message}`, 500);
+    }
+
+    // Track usage
+    for (let i = 0; i < docs.length; i++) {
+      await incrementDocumentCount(user.id);
+    }
+
+    // --- Phase 3: Batch generate all embeddings at once ---
+    const contents = items.map(
+      (item) => `Q: ${item.question.trim()}\nA: ${item.answer.trim()}`
+    );
+
+    let embeddings: number[][];
+    try {
+      embeddings = await generateEmbeddings(contents);
+    } catch (err) {
+      // Mark all docs as failed
+      await supabase
+        .from('documents')
+        .update({
+          status: 'failed',
+          error_message: err instanceof Error ? err.message : 'Embedding generation failed',
+        })
+        .in('id', docs.map((d) => d.id));
+
+      return errorResponse('Failed to generate embeddings. Q&A data was saved but not indexed.', 500);
+    }
+
+    // --- Phase 4: Batch insert all chunks ---
+    const chunksToInsert = docs.map((doc, i) => ({
+      document_id: doc.id,
+      bot_id: botId,
+      content: contents[i],
+      metadata: {
+        type: 'qa',
+        question: items[i].question.trim(),
+        file_name: `Q&A: ${items[i].question.trim().substring(0, 50)}`,
+      },
+      embedding: JSON.stringify(embeddings[i]),
+    }));
+
+    // Insert chunks in batches of 50
+    const batchSize = 50;
+    for (let i = 0; i < chunksToInsert.length; i += batchSize) {
+      const batch = chunksToInsert.slice(i, i + batchSize);
+      const { error: chunkError } = await supabase
+        .from('document_chunks')
+        .insert(batch);
+
+      if (chunkError) {
+        // Mark remaining docs as failed
+        const failedDocIds = docs.slice(i).map((d) => d.id);
+        await supabase
           .from('documents')
-          .insert({
-            bot_id: botId,
-            file_name: `Q&A: ${question.substring(0, 50)}`,
-            file_type: 'qa',
-            status: 'processing',
-          })
-          .select()
-          .single();
-
-        if (docError || !doc) {
-          results.success++;
-          continue;
-        }
-
-        await incrementDocumentCount(user.id);
-
-        // Generate embeddings
-        try {
-          const fullContent = `Q: ${question}\nA: ${answer}`;
-
-          if (fullContent.length <= 2000) {
-            const embedding = await generateEmbedding(fullContent);
-            await supabase.from('document_chunks').insert({
-              document_id: doc.id,
-              bot_id: botId,
-              content: fullContent,
-              metadata: { type: 'qa', question, file_name: `Q&A: ${question.substring(0, 50)}` },
-              embedding: JSON.stringify(embedding),
-            });
-          } else {
-            const chunks = chunkText(answer, { chunkSize: 500, chunkOverlap: 50 });
-            const chunkContents = chunks.map(
-              (c, i) => `Q: ${question}\nA (${i + 1}/${chunks.length}): ${c.content}`
-            );
-            const embeddings = await generateEmbeddings(chunkContents);
-
-            const batchSize = 50;
-            for (let i = 0; i < chunkContents.length; i += batchSize) {
-              const batch = chunkContents.slice(i, i + batchSize).map((content, j) => ({
-                document_id: doc.id,
-                bot_id: botId,
-                content,
-                metadata: {
-                  type: 'qa',
-                  question,
-                  file_name: `Q&A: ${question.substring(0, 50)}`,
-                  chunk_index: i + j,
-                },
-                embedding: JSON.stringify(embeddings[i + j]),
-              }));
-
-              await supabase.from('document_chunks').insert(batch);
-            }
-          }
-
-          const chunkCount = fullContent.length <= 2000 ? 1 : Math.ceil(answer.length / 500);
-          await supabase
-            .from('documents')
-            .update({ status: 'completed', chunk_count: chunkCount })
-            .eq('id', doc.id);
-        } catch (err) {
-          const message = err instanceof Error ? err.message : 'Failed to process Q&A';
-          await supabase
-            .from('documents')
-            .update({ status: 'failed', error_message: message })
-            .eq('id', doc.id);
-        }
-
-        results.success++;
-      } catch {
-        results.failed++;
+          .update({ status: 'failed', error_message: chunkError.message })
+          .in('id', failedDocIds);
       }
     }
 
-    return successResponse(results, 201);
+    // --- Phase 5: Mark all docs as completed ---
+    await supabase
+      .from('documents')
+      .update({ status: 'completed', chunk_count: 1 })
+      .eq('bot_id', botId)
+      .eq('status', 'processing')
+      .in('id', docs.map((d) => d.id));
+
+    return successResponse(
+      { success: items.length, failed: 0, errors: [] },
+      201
+    );
   } catch (err) {
     if (err instanceof AuthError) {
       return errorResponse(err.message, err.status);

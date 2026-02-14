@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 
 interface QAPairFormProps {
   botId: string;
@@ -13,66 +13,165 @@ interface CSVRow {
   category?: string;
 }
 
-function parseCSV(text: string): CSVRow[] {
-  const lines = text.split(/\r?\n/).filter((line) => line.trim());
-  if (lines.length < 2) return [];
+interface ParsedCSV {
+  headers: string[];
+  rows: string[][];
+}
 
-  // Parse header
-  const header = parseCSVLine(lines[0]).map((h) => h.trim().toLowerCase());
-  const qIdx = header.indexOf('question');
-  const aIdx = header.indexOf('answer');
-  const cIdx = header.indexOf('category');
+// --- RFC 4180 compliant CSV parser ---
 
-  if (qIdx === -1 || aIdx === -1) return [];
+function stripBOM(text: string): string {
+  return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+}
+
+function detectDelimiter(firstLine: string): string {
+  // Count occurrences of common delimiters in the first line
+  const candidates = [',', ';', '\t'] as const;
+  let best = ',';
+  let bestCount = 0;
+  for (const d of candidates) {
+    const count = firstLine.split(d).length - 1;
+    if (count > bestCount) {
+      bestCount = count;
+      best = d;
+    }
+  }
+  return best;
+}
+
+/**
+ * RFC 4180 compliant CSV parser.
+ * Handles: multiline quoted fields, escaped quotes (""), BOM, auto delimiter.
+ */
+function parseCSVFull(raw: string): ParsedCSV {
+  const text = stripBOM(raw);
+  if (!text.trim()) return { headers: [], rows: [] };
+
+  // Detect delimiter from first logical line
+  const firstLineEnd = text.indexOf('\n');
+  const firstLine = firstLineEnd === -1 ? text : text.substring(0, firstLineEnd);
+  const delimiter = detectDelimiter(firstLine);
+
+  const rows: string[][] = [];
+  let currentRow: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  let i = 0;
+
+  while (i < text.length) {
+    const char = text[i];
+
+    if (inQuotes) {
+      if (char === '"') {
+        if (i + 1 < text.length && text[i + 1] === '"') {
+          // Escaped quote
+          current += '"';
+          i += 2;
+        } else {
+          // End of quoted field
+          inQuotes = false;
+          i++;
+        }
+      } else {
+        // Any character inside quotes (including newlines)
+        current += char;
+        i++;
+      }
+    } else {
+      if (char === '"') {
+        inQuotes = true;
+        i++;
+      } else if (char === delimiter) {
+        currentRow.push(current);
+        current = '';
+        i++;
+      } else if (char === '\r') {
+        // Handle \r\n or lone \r
+        currentRow.push(current);
+        current = '';
+        if (currentRow.some((c) => c.trim())) {
+          rows.push(currentRow);
+        }
+        currentRow = [];
+        i++;
+        if (i < text.length && text[i] === '\n') i++;
+      } else if (char === '\n') {
+        currentRow.push(current);
+        current = '';
+        if (currentRow.some((c) => c.trim())) {
+          rows.push(currentRow);
+        }
+        currentRow = [];
+        i++;
+      } else {
+        current += char;
+        i++;
+      }
+    }
+  }
+
+  // Last field / row
+  currentRow.push(current);
+  if (currentRow.some((c) => c.trim())) {
+    rows.push(currentRow);
+  }
+
+  if (rows.length === 0) return { headers: [], rows: [] };
+
+  const headers = rows[0].map((h) => h.trim());
+  return { headers, rows: rows.slice(1) };
+}
+
+// --- Column auto-mapping ---
+
+type MappingField = 'question' | 'answer' | 'category';
+
+const COLUMN_ALIASES: Record<MappingField, string[]> = {
+  question: ['question', 'q', '질문', '문의', 'faq', 'query', '질의'],
+  answer: ['answer', 'a', '답변', '답', '응답', 'response', 'reply'],
+  category: ['category', '카테고리', '분류', '유형', 'type', 'tag', 'topic', '태그', '주제'],
+};
+
+function autoMapColumns(headers: string[]): Record<MappingField, number> {
+  const normalized = headers.map((h) => h.trim().toLowerCase());
+  const mapping: Record<MappingField, number> = { question: -1, answer: -1, category: -1 };
+
+  for (const field of Object.keys(COLUMN_ALIASES) as MappingField[]) {
+    for (const alias of COLUMN_ALIASES[field]) {
+      const idx = normalized.indexOf(alias);
+      if (idx !== -1) {
+        mapping[field] = idx;
+        break;
+      }
+    }
+  }
+
+  return mapping;
+}
+
+function applyMapping(
+  parsed: ParsedCSV,
+  mapping: Record<MappingField, number>
+): CSVRow[] {
+  if (mapping.question === -1 || mapping.answer === -1) return [];
 
   const rows: CSVRow[] = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cols = parseCSVLine(lines[i]);
-    const question = cols[qIdx]?.trim();
-    const answer = cols[aIdx]?.trim();
+  for (const cols of parsed.rows) {
+    const question = cols[mapping.question]?.trim();
+    const answer = cols[mapping.answer]?.trim();
     if (question && answer) {
       rows.push({
         question,
         answer,
-        category: cIdx !== -1 ? cols[cIdx]?.trim() : undefined,
+        category:
+          mapping.category !== -1 ? cols[mapping.category]?.trim() || undefined : undefined,
       });
     }
   }
   return rows;
 }
 
-function parseCSVLine(line: string): string[] {
-  const result: string[] = [];
-  let current = '';
-  let inQuotes = false;
-
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    if (inQuotes) {
-      if (char === '"') {
-        if (i + 1 < line.length && line[i + 1] === '"') {
-          current += '"';
-          i++;
-        } else {
-          inQuotes = false;
-        }
-      } else {
-        current += char;
-      }
-    } else {
-      if (char === '"') {
-        inQuotes = true;
-      } else if (char === ',') {
-        result.push(current);
-        current = '';
-      } else {
-        current += char;
-      }
-    }
-  }
-  result.push(current);
-  return result;
-}
+// --- Component ---
 
 export function QAPairForm({ botId, onCreated }: QAPairFormProps) {
   const [question, setQuestion] = useState('');
@@ -83,10 +182,25 @@ export function QAPairForm({ botId, onCreated }: QAPairFormProps) {
 
   // CSV upload state
   const [csvFile, setCsvFile] = useState<File | null>(null);
-  const [csvPreview, setCsvPreview] = useState<CSVRow[] | null>(null);
+  const [parsedCSV, setParsedCSV] = useState<ParsedCSV | null>(null);
+  const [columnMapping, setColumnMapping] = useState<Record<MappingField, number>>({
+    question: -1,
+    answer: -1,
+    category: -1,
+  });
+  const [needsManualMapping, setNeedsManualMapping] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [uploadResult, setUploadResult] = useState<{ success: number; failed: number } | null>(null);
+  const [uploadResult, setUploadResult] = useState<{
+    success: number;
+    failed: number;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Derive preview rows from parsed CSV + mapping
+  const csvPreview = useMemo(() => {
+    if (!parsedCSV) return null;
+    return applyMapping(parsedCSV, columnMapping);
+  }, [parsedCSV, columnMapping]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -130,22 +244,58 @@ export function QAPairForm({ botId, onCreated }: QAPairFormProps) {
 
     setError('');
     setUploadResult(null);
+    setNeedsManualMapping(false);
 
     if (!file.name.endsWith('.csv')) {
       setError('Please select a CSV file.');
       return;
     }
 
-    const text = await file.text();
-    const rows = parseCSV(text);
+    // Read file with encoding detection
+    let text: string;
+    try {
+      // Try UTF-8 first
+      text = await file.text();
+      // If garbled Korean detected, retry with EUC-KR (CP949)
+      if (/\ufffd/.test(text)) {
+        const buf = await file.arrayBuffer();
+        const decoder = new TextDecoder('euc-kr');
+        text = decoder.decode(buf);
+      }
+    } catch {
+      text = await file.text();
+    }
 
-    if (rows.length === 0) {
-      setError('No valid Q&A pairs found. CSV must have "question" and "answer" columns.');
+    const parsed = parseCSVFull(text);
+
+    if (parsed.headers.length === 0 || parsed.rows.length === 0) {
+      setError('No data found in the CSV file.');
       return;
     }
 
+    const mapping = autoMapColumns(parsed.headers);
+
     setCsvFile(file);
-    setCsvPreview(rows);
+    setParsedCSV(parsed);
+    setColumnMapping(mapping);
+
+    // If question or answer not auto-mapped, show manual mapping UI
+    if (mapping.question === -1 || mapping.answer === -1) {
+      setNeedsManualMapping(true);
+    }
+  }
+
+  function handleMappingChange(field: MappingField, value: number) {
+    setColumnMapping((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function handleMappingConfirm() {
+    if (columnMapping.question === -1 || columnMapping.answer === -1) {
+      setError('Please map both Question and Answer columns.');
+      return;
+    }
+    setError('');
+    setNeedsManualMapping(false);
   }
 
   async function handleCSVUpload() {
@@ -171,7 +321,8 @@ export function QAPairForm({ botId, onCreated }: QAPairFormProps) {
 
       setUploadResult({ success: json.data.success, failed: json.data.failed });
       setCsvFile(null);
-      setCsvPreview(null);
+      setParsedCSV(null);
+      setNeedsManualMapping(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
       onCreated();
     } catch {
@@ -183,11 +334,16 @@ export function QAPairForm({ botId, onCreated }: QAPairFormProps) {
 
   function handleCancelCSV() {
     setCsvFile(null);
-    setCsvPreview(null);
+    setParsedCSV(null);
+    setNeedsManualMapping(false);
     setUploadResult(null);
     setError('');
     if (fileInputRef.current) fileInputRef.current.value = '';
   }
+
+  // Check if mapping is ready and preview has data
+  const mappingReady =
+    !needsManualMapping && csvPreview !== null && csvPreview.length > 0;
 
   return (
     <div className="space-y-6">
@@ -222,25 +378,111 @@ export function QAPairForm({ botId, onCreated }: QAPairFormProps) {
           />
         </div>
 
-        {csvPreview && (
+        {/* Column Mapping UI */}
+        {needsManualMapping && parsedCSV && (
+          <div className="mt-4 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 p-4">
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-300 mb-3">
+              Could not auto-detect columns. Please map your CSV columns:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {(['question', 'answer', 'category'] as MappingField[]).map((field) => (
+                <div key={field}>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    {field === 'question'
+                      ? 'Question *'
+                      : field === 'answer'
+                        ? 'Answer *'
+                        : 'Category'}
+                  </label>
+                  <select
+                    value={columnMapping[field]}
+                    onChange={(e) => handleMappingChange(field, parseInt(e.target.value, 10))}
+                    className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-2 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value={-1}>-- Select --</option>
+                    {parsedCSV.headers.map((h, idx) => (
+                      <option key={idx} value={idx}>
+                        {h || `Column ${idx + 1}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+            </div>
+            {/* Raw preview */}
+            <div className="mt-3 max-h-28 overflow-y-auto rounded border border-gray-200 dark:border-gray-600">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
+                  <tr>
+                    {parsedCSV.headers.map((h, i) => (
+                      <th key={i} className="px-2 py-1 text-left text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                        {h || `Col ${i + 1}`}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {parsedCSV.rows.slice(0, 3).map((row, ri) => (
+                    <tr key={ri} className="border-t border-gray-100 dark:border-gray-700">
+                      {parsedCSV.headers.map((_, ci) => (
+                        <td key={ci} className="px-2 py-1 text-gray-900 dark:text-gray-200 max-w-[150px] truncate">
+                          {row[ci] || ''}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={handleMappingConfirm}
+                className="rounded-lg bg-amber-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-amber-700"
+              >
+                Apply Mapping
+              </button>
+              <button
+                onClick={handleCancelCSV}
+                className="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Mapped preview */}
+        {mappingReady && csvPreview && (
           <div className="mt-3">
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              {csvPreview.length} Q&A pair(s) found in <span className="font-medium">{csvFile?.name}</span>
+              {csvPreview.length} Q&A pair(s) found in{' '}
+              <span className="font-medium">{csvFile?.name}</span>
             </p>
             <div className="max-h-40 overflow-y-auto rounded border border-gray-200 dark:border-gray-600">
               <table className="w-full text-xs">
                 <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
                   <tr>
                     <th className="px-2 py-1 text-left text-gray-600 dark:text-gray-400">#</th>
-                    <th className="px-2 py-1 text-left text-gray-600 dark:text-gray-400">Question</th>
-                    <th className="px-2 py-1 text-left text-gray-600 dark:text-gray-400">Answer</th>
-                    <th className="px-2 py-1 text-left text-gray-600 dark:text-gray-400">Category</th>
+                    <th className="px-2 py-1 text-left text-gray-600 dark:text-gray-400">
+                      Question
+                    </th>
+                    <th className="px-2 py-1 text-left text-gray-600 dark:text-gray-400">
+                      Answer
+                    </th>
+                    <th className="px-2 py-1 text-left text-gray-600 dark:text-gray-400">
+                      Category
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {csvPreview.slice(0, 10).map((row, i) => (
-                    <tr key={i} className="border-t border-gray-100 dark:border-gray-700">
-                      <td className="px-2 py-1 text-gray-500 dark:text-gray-400">{i + 1}</td>
+                    <tr
+                      key={i}
+                      className="border-t border-gray-100 dark:border-gray-700"
+                    >
+                      <td className="px-2 py-1 text-gray-500 dark:text-gray-400">
+                        {i + 1}
+                      </td>
                       <td className="px-2 py-1 text-gray-900 dark:text-gray-200 max-w-[200px] truncate">
                         {row.question}
                       </td>
@@ -266,7 +508,9 @@ export function QAPairForm({ botId, onCreated }: QAPairFormProps) {
                 disabled={uploading}
                 className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
               >
-                {uploading ? 'Uploading...' : `Upload ${csvPreview.length} Q&A pairs`}
+                {uploading
+                  ? 'Uploading...'
+                  : `Upload ${csvPreview.length} Q&A pairs`}
               </button>
               <button
                 onClick={handleCancelCSV}
@@ -277,6 +521,13 @@ export function QAPairForm({ botId, onCreated }: QAPairFormProps) {
               </button>
             </div>
           </div>
+        )}
+
+        {/* Mapped but no valid rows */}
+        {!needsManualMapping && parsedCSV && csvPreview && csvPreview.length === 0 && (
+          <p className="mt-3 text-sm text-red-600 dark:text-red-400">
+            No valid Q&A pairs found with current column mapping. Please check your CSV.
+          </p>
         )}
 
         {uploadResult && (
@@ -306,7 +557,9 @@ export function QAPairForm({ botId, onCreated }: QAPairFormProps) {
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Question</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Question
+          </label>
           <textarea
             rows={2}
             required
@@ -318,7 +571,9 @@ export function QAPairForm({ botId, onCreated }: QAPairFormProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Answer</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Answer
+          </label>
           <textarea
             rows={4}
             required
@@ -330,7 +585,9 @@ export function QAPairForm({ botId, onCreated }: QAPairFormProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category (optional)</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Category (optional)
+          </label>
           <input
             type="text"
             value={category}

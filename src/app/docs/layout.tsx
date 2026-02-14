@@ -49,6 +49,11 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
             <span className="hidden text-sm text-gray-400 sm:inline">/</span>
             <span className="hidden text-sm font-medium text-gray-600 sm:inline">{t('header.title')}</span>
           </div>
+          <nav className="hidden items-center gap-6 md:flex">
+            <Link href="/pricing" className="text-sm text-gray-600 hover:text-gray-900">Pricing</Link>
+            <Link href="/docs" className="text-sm text-gray-600 hover:text-gray-900">Docs</Link>
+            <Link href="/demo" className="text-sm text-gray-600 hover:text-gray-900">Demo</Link>
+          </nav>
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
             <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900">{t('header.login')}</Link>

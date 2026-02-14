@@ -113,6 +113,11 @@ export default function PricingPage() {
       <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-sm px-6 py-4">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <Link href="/" className="text-xl font-bold text-gray-900">AskDocs</Link>
+          <nav className="hidden items-center gap-6 sm:flex">
+            <Link href="/pricing" className="text-sm text-gray-600 hover:text-gray-900">Pricing</Link>
+            <Link href="/docs" className="text-sm text-gray-600 hover:text-gray-900">Docs</Link>
+            <Link href="/demo" className="text-sm text-gray-600 hover:text-gray-900">Demo</Link>
+          </nav>
           <div className="flex items-center gap-3">
             <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900">Log in</Link>
             <Link href="/signup" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">

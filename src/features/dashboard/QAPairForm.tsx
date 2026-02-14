@@ -378,6 +378,24 @@ export function QAPairForm({ botId, onCreated }: QAPairFormProps) {
           />
         </div>
 
+        {/* Excel → CSV guide */}
+        <details className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+          <summary className="cursor-pointer hover:text-gray-700 dark:hover:text-gray-300">
+            How to convert Excel to CSV
+          </summary>
+          <div className="mt-2 space-y-1.5 pl-3 border-l-2 border-gray-200 dark:border-gray-600">
+            <p><span className="font-medium text-gray-700 dark:text-gray-300">Excel &rarr; CSV:</span> File &rarr; Save As &rarr; <span className="font-medium">CSV UTF-8 (Comma delimited)</span></p>
+            <p><span className="font-medium text-gray-700 dark:text-gray-300">Google Sheets:</span> File &rarr; Download &rarr; Comma Separated Values (.csv)</p>
+            <p className="pt-1 font-medium text-gray-700 dark:text-gray-300">Tips:</p>
+            <ul className="list-disc pl-4 space-y-0.5">
+              <li>Column names like <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">question</code>, <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">answer</code> or <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">{'\uC9C8\uBB38'}</code>, <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">{'\uB2F5\uBCC0'}</code> are auto-detected</li>
+              <li>Multi-line answers are supported &mdash; Excel wraps them in quotes automatically</li>
+              <li>Save as <span className="font-medium">UTF-8</span> to avoid Korean character issues</li>
+              <li>If columns aren&apos;t recognized, you can map them manually</li>
+            </ul>
+          </div>
+        </details>
+
         {/* Column Mapping UI */}
         {needsManualMapping && parsedCSV && (
           <div className="mt-4 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 p-4">

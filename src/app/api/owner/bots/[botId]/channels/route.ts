@@ -115,7 +115,35 @@ export async function POST(
       return successResponse(created, 201);
     }
 
-    // Generic channel config (kakao, wechat, api)
+    // For KakaoTalk: validate app_key and store webhook URL
+    if (channel === 'kakao') {
+      const appKey = config.app_key;
+      if (!appKey || typeof appKey !== 'string') {
+        return errorResponse('app_key (REST API 키) is required for KakaoTalk', 400);
+      }
+
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const webhookUrl = `${appUrl}/api/webhooks/kakao/${botId}`;
+
+      const { data: created, error } = await supabase
+        .from('channel_configs')
+        .insert({
+          bot_id: botId,
+          channel: 'kakao',
+          config: {
+            app_key: appKey,
+            webhook_url: webhookUrl,
+          },
+          is_active: true,
+        })
+        .select()
+        .single();
+
+      if (error) return errorResponse(error.message, 500);
+      return successResponse(created, 201);
+    }
+
+    // Generic channel config (wechat, api)
     const { data: created, error } = await supabase
       .from('channel_configs')
       .insert({

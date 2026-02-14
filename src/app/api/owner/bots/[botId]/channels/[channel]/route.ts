@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { requireOwner, AuthError } from '@/lib/auth/guards';
 import { createClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/service';
 import { deleteWebhook, setWebhook } from '@/lib/channels/telegram/api';
 import { successResponse, errorResponse } from '@/lib/api/response';
 
@@ -117,6 +118,15 @@ export async function DELETE(
       if (config.bot_token) {
         await deleteWebhook(config.bot_token).catch(() => {});
       }
+    }
+
+    // For KakaoTalk: clean up user mappings
+    if (channel === 'kakao') {
+      const serviceClient = createServiceRoleClient();
+      await serviceClient
+        .from('kakao_user_mappings')
+        .delete()
+        .eq('bot_id', botId);
     }
 
     const { error } = await supabase

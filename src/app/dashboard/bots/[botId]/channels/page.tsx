@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ChannelCard } from '@/features/dashboard/ChannelCard';
 import { TelegramSetup } from '@/features/dashboard/TelegramSetup';
+import { KakaoSetup } from '@/features/dashboard/KakaoSetup';
 
 interface ChannelConfig {
   id: string;
@@ -39,6 +40,7 @@ export default function ChannelsPage() {
   }, [fetchChannels]);
 
   const telegramConfig = channels.find((c) => c.channel === 'telegram');
+  const kakaoConfig = channels.find((c) => c.channel === 'kakao');
 
   async function handleDisconnect(channel: string) {
     if (!confirm(`Disconnect ${channel}? The webhook will be removed.`)) return;
@@ -124,7 +126,7 @@ export default function ChannelsPage() {
           )}
         </ChannelCard>
 
-        {/* KakaoTalk — Locked */}
+        {/* KakaoTalk */}
         <ChannelCard
           name="KakaoTalk"
           description="Connect to KakaoTalk for Korean users."
@@ -133,10 +135,31 @@ export default function ChannelsPage() {
               <path d="M12 3c5.5 0 10 3.58 10 8s-4.5 8-10 8c-.84 0-1.65-.09-2.43-.25L5.5 21l1.09-3.27C4.39 16.17 2 13.82 2 11c0-4.42 4.5-8 10-8z" />
             </svg>
           }
-          isConnected={false}
-          isLocked={true}
-          lockedMessage="Available on Pro plan and above."
-        />
+          isConnected={!!kakaoConfig}
+          isActive={kakaoConfig?.is_active}
+          onToggle={(active) => handleToggle('kakao', active)}
+          onDisconnect={() => handleDisconnect('kakao')}
+        >
+          {!kakaoConfig && (
+            <KakaoSetup botId={botId} onConnected={fetchChannels} />
+          )}
+          {kakaoConfig && (
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              <p>
+                REST API 키: <code className="text-gray-700 dark:text-gray-300">{kakaoConfig.config.app_key?.slice(0, 8)}...</code>
+              </p>
+              <div className="mt-1">
+                <p className="text-xs text-gray-400">Webhook URL:</p>
+                <code className="text-xs text-gray-600 dark:text-gray-400 break-all">
+                  {kakaoConfig.config.webhook_url}
+                </code>
+              </div>
+              <p className="mt-1">
+                Connected {new Date(kakaoConfig.created_at).toLocaleDateString()}
+              </p>
+            </div>
+          )}
+        </ChannelCard>
 
         {/* WeChat — Locked */}
         <ChannelCard

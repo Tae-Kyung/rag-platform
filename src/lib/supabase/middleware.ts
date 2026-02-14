@@ -6,6 +6,17 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
+  // Auto-detect locale from IP country on first visit (no existing cookie)
+  if (!request.cookies.has('NEXT_LOCALE')) {
+    const country = request.headers.get('x-vercel-ip-country');
+    const locale = country === 'KR' ? 'ko' : 'en';
+    supabaseResponse.cookies.set('NEXT_LOCALE', locale, {
+      path: '/',
+      maxAge: 365 * 24 * 60 * 60,
+      sameSite: 'lax',
+    });
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

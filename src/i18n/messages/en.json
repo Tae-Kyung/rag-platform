@@ -1,0 +1,50 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "confirm": "Confirm"
+  },
+  "auth": {
+    "login": "Log in",
+    "signup": "Sign up",
+    "logout": "Log out",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "fullName": "Full name",
+    "forgotPassword": "Forgot password?",
+    "resetPassword": "Reset password",
+    "sendResetLink": "Send reset link",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "loginSuccess": "Welcome back!",
+    "signupSuccess": "Account created! Please check your email to confirm.",
+    "resetSuccess": "Password reset link sent to your email.",
+    "invalidCredentials": "Invalid email or password.",
+    "passwordMismatch": "Passwords do not match.",
+    "emailRequired": "Email is required.",
+    "passwordRequired": "Password is required.",
+    "passwordMinLength": "Password must be at least 6 characters."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome, {name}!",
+    "noBots": "You haven't created any bots yet.",
+    "createBot": "Create your first bot"
+  },
+  "landing": {
+    "title": "AskDocs",
+    "subtitle": "Build AI-powered knowledge bots from your documents",
+    "getStarted": "Get Started Free",
+    "learnMore": "Learn More"
+  }
+}

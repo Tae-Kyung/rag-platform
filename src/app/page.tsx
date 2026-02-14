@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-white">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-sm px-6 py-4">
         <div className="mx-auto flex max-w-6xl items-center justify-between">

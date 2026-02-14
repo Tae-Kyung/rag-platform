@@ -1,9 +1,0 @@
-{
-  "functions": {
-    "src/app/api/chat/route.ts": { "maxDuration": 60 },
-    "src/app/api/v1/chat/route.ts": { "maxDuration": 60 },
-    "src/app/api/owner/bots/*/documents/process/route.ts": { "maxDuration": 60 },
-    "src/app/api/webhooks/paddle/route.ts": { "maxDuration": 30 },
-    "src/app/api/webhooks/telegram/*/route.ts": { "maxDuration": 30 }
-  }
-}

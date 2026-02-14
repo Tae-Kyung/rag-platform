@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { EventName } from '@paddle/paddle-node-sdk';
+
+export const maxDuration = 30;
 import { getPaddle } from '@/lib/billing/paddle';
 import {
   handleSubscriptionCreated,

@@ -8,6 +8,7 @@ import { buildSystemPrompt, assessConfidence } from '@/lib/rag/prompts';
 import { getOpenAI } from '@/lib/openai/client';
 import { deduplicateSources } from '@/lib/chat/sources';
 import { buildChatMessages } from '@/lib/chat/history';
+
 import { MAX_MESSAGE_LENGTH } from '@/config/constants';
 import { v4 as uuidv4 } from 'uuid';
 

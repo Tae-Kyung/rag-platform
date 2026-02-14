@@ -32,7 +32,7 @@ export default async function DashboardLayout({
       <aside className="hidden w-64 shrink-0 border-r border-gray-200 bg-white md:block">
         <div className="flex h-full flex-col">
           <div className="border-b border-gray-200 px-6 py-4">
-            <Link href="/dashboard" className="text-xl font-bold text-gray-900">
+            <Link href="/" className="text-xl font-bold text-gray-900">
               AskDocs
             </Link>
           </div>
@@ -97,7 +97,7 @@ export default async function DashboardLayout({
         {/* Top bar */}
         <header className="border-b border-gray-200 bg-white px-6 py-3">
           <div className="flex items-center justify-between">
-            <Link href="/dashboard" className="text-xl font-bold text-gray-900 md:hidden">
+            <Link href="/" className="text-xl font-bold text-gray-900 md:hidden">
               AskDocs
             </Link>
             <div className="ml-auto flex items-center gap-4">

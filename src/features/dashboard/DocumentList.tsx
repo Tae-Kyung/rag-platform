@@ -14,6 +14,8 @@ interface DocumentListProps {
   documents: Document[];
   onDelete: (docId: string) => void;
   deleting: string | null;
+  selectedIds: Set<string>;
+  onSelectionChange: (ids: Set<string>) => void;
 }
 
 function statusBadge(status: string) {
@@ -67,7 +69,13 @@ function formatDate(dateStr: string) {
   });
 }
 
-export function DocumentList({ documents, onDelete, deleting }: DocumentListProps) {
+export function DocumentList({
+  documents,
+  onDelete,
+  deleting,
+  selectedIds,
+  onSelectionChange,
+}: DocumentListProps) {
   if (documents.length === 0) {
     return (
       <p className="py-8 text-center text-sm text-gray-400 dark:text-gray-500">
@@ -76,11 +84,43 @@ export function DocumentList({ documents, onDelete, deleting }: DocumentListProp
     );
   }
 
+  const allSelected = documents.length > 0 && documents.every((d) => selectedIds.has(d.id));
+  const someSelected = documents.some((d) => selectedIds.has(d.id));
+
+  function handleSelectAll() {
+    if (allSelected) {
+      onSelectionChange(new Set());
+    } else {
+      onSelectionChange(new Set(documents.map((d) => d.id)));
+    }
+  }
+
+  function handleToggle(id: string) {
+    const next = new Set(selectedIds);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    onSelectionChange(next);
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead>
           <tr className="border-b border-gray-200 dark:border-gray-700 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <th className="px-3 py-3 w-10">
+              <input
+                type="checkbox"
+                checked={allSelected}
+                ref={(el) => {
+                  if (el) el.indeterminate = someSelected && !allSelected;
+                }}
+                onChange={handleSelectAll}
+                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+              />
+            </th>
             <th className="px-3 py-3">File Name</th>
             <th className="px-3 py-3">Type</th>
             <th className="px-3 py-3">Size</th>
@@ -92,7 +132,20 @@ export function DocumentList({ documents, onDelete, deleting }: DocumentListProp
         </thead>
         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
           {documents.map((doc) => (
-            <tr key={doc.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+            <tr
+              key={doc.id}
+              className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                selectedIds.has(doc.id) ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+              }`}
+            >
+              <td className="px-3 py-3">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(doc.id)}
+                  onChange={() => handleToggle(doc.id)}
+                  className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                />
+              </td>
               <td className="max-w-[200px] truncate px-3 py-3 font-medium text-gray-900 dark:text-white">
                 {doc.file_name}
               </td>

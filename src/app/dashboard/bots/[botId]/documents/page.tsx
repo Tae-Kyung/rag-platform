@@ -23,6 +23,8 @@ export default function DocumentsPage() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [crawlUrl, setCrawlUrl] = useState('');
   const [crawling, setCrawling] = useState(false);
   const [activeSection, setActiveSection] = useState<'upload' | 'crawl' | 'qa'>('upload');
@@ -59,11 +61,41 @@ export default function DocumentsPage() {
     setDeleting(docId);
     try {
       await fetch(`/api/owner/bots/${botId}/documents/${docId}`, { method: 'DELETE' });
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(docId);
+        return next;
+      });
       fetchDocuments();
     } catch {
       alert('Failed to delete document');
     } finally {
       setDeleting(null);
+    }
+  }
+
+  async function handleBulkDelete() {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Delete ${selectedIds.size} selected document(s)? All associated chunks will be removed.`)) return;
+
+    setBulkDeleting(true);
+    try {
+      const res = await fetch(`/api/owner/bots/${botId}/documents/bulk-delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: Array.from(selectedIds) }),
+      });
+      const json = await res.json();
+      if (!json.success) {
+        alert(json.error || 'Failed to delete documents');
+      } else {
+        setSelectedIds(new Set());
+      }
+      fetchDocuments();
+    } catch {
+      alert('Failed to delete documents');
+    } finally {
+      setBulkDeleting(false);
     }
   }
 
@@ -167,12 +199,27 @@ export default function DocumentsPage() {
 
       {/* Document list */}
       <div className="mt-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Documents</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Documents</h3>
+          {selectedIds.size > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              disabled={bulkDeleting}
+              className="rounded-lg bg-red-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+            >
+              {bulkDeleting
+                ? 'Deleting...'
+                : `Delete Selected (${selectedIds.size})`}
+            </button>
+          )}
+        </div>
         <div className="mt-4">
           <DocumentList
             documents={documents}
             onDelete={handleDelete}
             deleting={deleting}
+            selectedIds={selectedIds}
+            onSelectionChange={setSelectedIds}
           />
         </div>
       </div>

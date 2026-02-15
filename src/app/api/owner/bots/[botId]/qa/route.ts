@@ -19,12 +19,28 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     await requireOwner(botId);
 
     const { searchParams } = new URL(request.url);
+    const supabase = createServiceRoleClient();
+
+    // Lookup by document_id (for Q&A edit from documents page)
+    const documentId = searchParams.get('document_id');
+    if (documentId) {
+      const { data, error } = await supabase
+        .from('qa_pairs')
+        .select('*')
+        .eq('bot_id', botId)
+        .eq('document_id', documentId)
+        .single();
+
+      if (error || !data) {
+        return errorResponse('Q&A pair not found for this document', 404);
+      }
+      return successResponse(data);
+    }
+
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
     const from = (page - 1) * limit;
     const to = from + limit - 1;
-
-    const supabase = createServiceRoleClient();
 
     const { data, error, count } = await supabase
       .from('qa_pairs')

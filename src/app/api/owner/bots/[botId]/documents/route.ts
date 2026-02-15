@@ -50,12 +50,31 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return errorResponse('Failed to fetch documents', 500);
     }
 
+    // Fetch type counts in parallel
+    const [
+      { count: fileCount },
+      { count: urlCount },
+      { count: qaCount },
+      { count: allCount },
+    ] = await Promise.all([
+      supabase.from('documents').select('id', { count: 'exact', head: true }).eq('bot_id', botId).not('file_type', 'in', '("url","qa")'),
+      supabase.from('documents').select('id', { count: 'exact', head: true }).eq('bot_id', botId).eq('file_type', 'url'),
+      supabase.from('documents').select('id', { count: 'exact', head: true }).eq('bot_id', botId).eq('file_type', 'qa'),
+      supabase.from('documents').select('id', { count: 'exact', head: true }).eq('bot_id', botId),
+    ]);
+
     return successResponse({
       documents: data,
       total: count ?? 0,
       page,
       limit,
       totalPages: Math.ceil((count ?? 0) / limit),
+      counts: {
+        all: allCount ?? 0,
+        file: fileCount ?? 0,
+        url: urlCount ?? 0,
+        qa: qaCount ?? 0,
+      },
     });
   } catch (err) {
     if (err instanceof AuthError) {

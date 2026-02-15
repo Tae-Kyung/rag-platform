@@ -163,15 +163,19 @@ export async function processDocument(
       }
     }
 
-    // Update document status
+    // Update document status (+ page title for URL docs)
+    const updateData: Record<string, unknown> = {
+      status: 'completed',
+      chunk_count: allChunks.length,
+      language: docLanguage,
+      doc_type: docType,
+    };
+    if (pageTitle && doc.file_type === 'url') {
+      updateData.file_name = pageTitle;
+    }
     await supabase
       .from('documents')
-      .update({
-        status: 'completed',
-        chunk_count: allChunks.length,
-        language: docLanguage,
-        doc_type: docType,
-      })
+      .update(updateData)
       .eq('id', documentId);
 
     return { success: true, chunks: allChunks.length };

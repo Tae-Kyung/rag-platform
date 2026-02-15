@@ -5,6 +5,7 @@ interface Document {
   file_name: string;
   file_type: string;
   file_size: number | null;
+  source_url: string | null;
   status: string;
   chunk_count: number;
   created_at: string;
@@ -16,6 +17,7 @@ interface DocumentListProps {
   deleting: string | null;
   selectedIds: Set<string>;
   onSelectionChange: (ids: Set<string>) => void;
+  onEditQA?: (docId: string) => void;
 }
 
 function statusBadge(status: string) {
@@ -69,12 +71,61 @@ function formatDate(dateStr: string) {
   });
 }
 
+function FileNameCell({ doc, onEditQA }: { doc: Document; onEditQA?: (docId: string) => void }) {
+  // URL documents: show title as clickable link
+  if (doc.file_type === 'url' && doc.source_url) {
+    return (
+      <div className="max-w-[250px]">
+        <a
+          href={doc.source_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="truncate block font-medium text-blue-600 dark:text-blue-400 hover:underline"
+          title={doc.source_url}
+        >
+          {doc.file_name || doc.source_url}
+        </a>
+        {doc.file_name && doc.file_name !== doc.source_url && (
+          <span className="truncate block text-xs text-gray-400 dark:text-gray-500 mt-0.5" title={doc.source_url}>
+            {doc.source_url}
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  // Q&A documents: clickable to edit
+  if (doc.file_type === 'qa' && onEditQA) {
+    const displayName = doc.file_name.startsWith('Q&A: ')
+      ? doc.file_name.substring(5)
+      : doc.file_name;
+    return (
+      <button
+        onClick={() => onEditQA(doc.id)}
+        className="max-w-[250px] truncate block text-left font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
+        title="Click to view/edit"
+      >
+        {displayName}
+        <span className="ml-1 text-xs text-gray-400">&#9998;</span>
+      </button>
+    );
+  }
+
+  // Regular files
+  return (
+    <span className="max-w-[250px] truncate block font-medium text-gray-900 dark:text-white">
+      {doc.file_name}
+    </span>
+  );
+}
+
 export function DocumentList({
   documents,
   onDelete,
   deleting,
   selectedIds,
   onSelectionChange,
+  onEditQA,
 }: DocumentListProps) {
   if (documents.length === 0) {
     return (
@@ -121,7 +172,7 @@ export function DocumentList({
                 className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
               />
             </th>
-            <th className="px-3 py-3">File Name</th>
+            <th className="px-3 py-3">Name</th>
             <th className="px-3 py-3">Type</th>
             <th className="px-3 py-3">Size</th>
             <th className="px-3 py-3">Status</th>
@@ -146,8 +197,8 @@ export function DocumentList({
                   className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                 />
               </td>
-              <td className="max-w-[200px] truncate px-3 py-3 font-medium text-gray-900 dark:text-white">
-                {doc.file_name}
+              <td className="px-3 py-3">
+                <FileNameCell doc={doc} onEditQA={onEditQA} />
               </td>
               <td className="px-3 py-3 text-gray-500 dark:text-gray-400">{doc.file_type}</td>
               <td className="px-3 py-3 text-gray-500 dark:text-gray-400">{formatSize(doc.file_size)}</td>

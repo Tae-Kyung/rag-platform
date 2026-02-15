@@ -12,10 +12,29 @@ interface Document {
   file_name: string;
   file_type: string;
   file_size: number | null;
+  source_url: string | null;
   status: string;
   chunk_count: number;
   created_at: string;
 }
+
+interface QAEditData {
+  qaId: string;
+  question: string;
+  answer: string;
+  category: string;
+}
+
+interface TypeCounts {
+  all: number;
+  file: number;
+  url: number;
+  qa: number;
+}
+
+type FilterType = 'all' | 'file' | 'url' | 'qa';
+
+const ITEMS_PER_PAGE = 20;
 
 export default function DocumentsPage() {
   const params = useParams();
@@ -29,19 +48,44 @@ export default function DocumentsPage() {
   const [crawling, setCrawling] = useState(false);
   const [activeSection, setActiveSection] = useState<'upload' | 'crawl' | 'qa'>('upload');
 
-  const fetchDocuments = useCallback(async () => {
+  // Pagination & filter state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [counts, setCounts] = useState<TypeCounts>({ all: 0, file: 0, url: 0, qa: 0 });
+
+  // QA edit modal state
+  const [qaEdit, setQaEdit] = useState<QAEditData | null>(null);
+  const [qaEditLoading, setQaEditLoading] = useState(false);
+  const [qaEditSaving, setQaEditSaving] = useState(false);
+
+  const fetchDocuments = useCallback(async (page?: number, type?: FilterType) => {
+    const p = page ?? currentPage;
+    const t = type ?? filterType;
     try {
-      const res = await fetch(`/api/owner/bots/${botId}/documents?limit=100`);
+      const params = new URLSearchParams({
+        page: String(p),
+        limit: String(ITEMS_PER_PAGE),
+      });
+      if (t !== 'all') params.set('type', t);
+
+      const res = await fetch(`/api/owner/bots/${botId}/documents?${params}`);
       const json = await res.json();
       if (json.success) {
         setDocuments(json.data.documents);
+        setTotal(json.data.total);
+        setTotalPages(json.data.totalPages);
+        if (json.data.counts) {
+          setCounts(json.data.counts);
+        }
       }
     } catch (err) {
       console.error('Failed to fetch documents:', err);
     } finally {
       setLoading(false);
     }
-  }, [botId]);
+  }, [botId, currentPage, filterType]);
 
   useEffect(() => {
     fetchDocuments();
@@ -52,9 +96,24 @@ export default function DocumentsPage() {
     const hasProcessing = documents.some((d) => d.status === 'processing' || d.status === 'pending');
     if (!hasProcessing) return;
 
-    const interval = setInterval(fetchDocuments, 5000);
+    const interval = setInterval(() => fetchDocuments(), 5000);
     return () => clearInterval(interval);
   }, [documents, fetchDocuments]);
+
+  function handleFilterChange(type: FilterType) {
+    setFilterType(type);
+    setCurrentPage(1);
+    setSelectedIds(new Set());
+    setLoading(true);
+    fetchDocuments(1, type);
+  }
+
+  function handlePageChange(page: number) {
+    setCurrentPage(page);
+    setSelectedIds(new Set());
+    setLoading(true);
+    fetchDocuments(page);
+  }
 
   async function handleDelete(docId: string) {
     if (!confirm('Delete this document? All associated chunks will be removed.')) return;
@@ -123,7 +182,63 @@ export default function DocumentsPage() {
     }
   }
 
-  if (loading) {
+  async function handleEditQA(docId: string) {
+    setQaEditLoading(true);
+    try {
+      const res = await fetch(`/api/owner/bots/${botId}/qa?document_id=${docId}`);
+      const json = await res.json();
+      if (json.success && json.data) {
+        setQaEdit({
+          qaId: json.data.id,
+          question: json.data.question,
+          answer: json.data.answer,
+          category: json.data.category || '',
+        });
+      } else {
+        alert('Could not load Q&A data');
+      }
+    } catch {
+      alert('Failed to load Q&A');
+    } finally {
+      setQaEditLoading(false);
+    }
+  }
+
+  async function handleSaveQA() {
+    if (!qaEdit) return;
+    setQaEditSaving(true);
+    try {
+      const res = await fetch(`/api/owner/bots/${botId}/qa/${qaEdit.qaId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: qaEdit.question,
+          answer: qaEdit.answer,
+          category: qaEdit.category,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setQaEdit(null);
+        fetchDocuments();
+      } else {
+        alert(json.error || 'Failed to save');
+      }
+    } catch {
+      alert('Failed to save Q&A');
+    } finally {
+      setQaEditSaving(false);
+    }
+  }
+
+  const filterTabs: { key: FilterType; label: string; count: number }[] = [
+    { key: 'all', label: 'All', count: counts.all },
+    { key: 'file', label: 'File', count: counts.file },
+    { key: 'url', label: 'URL', count: counts.url },
+    { key: 'qa', label: 'Q&A', count: counts.qa },
+  ];
+
+  if (loading && documents.length === 0) {
     return (
       <div className="flex items-center justify-center py-24">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
@@ -143,7 +258,7 @@ export default function DocumentsPage() {
           </Link>
           <h2 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">Knowledge Base</h2>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {documents.length} documents
+            {counts.all} documents
           </p>
         </div>
       </div>
@@ -213,6 +328,36 @@ export default function DocumentsPage() {
             </button>
           )}
         </div>
+
+        {/* Filter tabs */}
+        <div className="mt-3 flex gap-1 border-b border-gray-200 dark:border-gray-700">
+          {filterTabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => handleFilterChange(tab.key)}
+              className={`relative px-3 py-2 text-sm font-medium transition-colors ${
+                filterType === tab.key
+                  ? 'text-blue-600 dark:text-blue-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+            >
+              {tab.label}
+              <span
+                className={`ml-1.5 inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-xs font-medium ${
+                  filterType === tab.key
+                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                }`}
+              >
+                {tab.count}
+              </span>
+              {filterType === tab.key && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400" />
+              )}
+            </button>
+          ))}
+        </div>
+
         <div className="mt-4">
           <DocumentList
             documents={documents}
@@ -220,9 +365,161 @@ export default function DocumentsPage() {
             deleting={deleting}
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}
+            onEditQA={handleEditQA}
           />
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {((currentPage - 1) * ITEMS_PER_PAGE) + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, total)} of {total}
+            </p>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage <= 1}
+                className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Prev
+              </button>
+              <PageNumbers
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage >= totalPages}
+                className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* QA Edit Modal */}
+      {(qaEdit || qaEditLoading) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => !qaEditSaving && setQaEdit(null)}>
+          <div
+            className="mx-4 w-full max-w-lg rounded-xl bg-white dark:bg-gray-800 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {qaEditLoading ? (
+              <div className="flex items-center justify-center py-16">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+              </div>
+            ) : qaEdit ? (
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Edit Q&A</h3>
+                <div className="mt-4 space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Question
+                    </label>
+                    <input
+                      type="text"
+                      value={qaEdit.question}
+                      onChange={(e) => setQaEdit({ ...qaEdit, question: e.target.value })}
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Answer
+                    </label>
+                    <textarea
+                      value={qaEdit.answer}
+                      onChange={(e) => setQaEdit({ ...qaEdit, answer: e.target.value })}
+                      rows={6}
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Category <span className="text-gray-400 font-normal">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={qaEdit.category}
+                      onChange={(e) => setQaEdit({ ...qaEdit, category: e.target.value })}
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                <div className="mt-6 flex justify-end gap-3">
+                  <button
+                    onClick={() => setQaEdit(null)}
+                    disabled={qaEditSaving}
+                    className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveQA}
+                    disabled={qaEditSaving || !qaEdit.question.trim() || !qaEdit.answer.trim()}
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {qaEditSaving ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+function PageNumbers({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}) {
+  const pages: (number | 'ellipsis')[] = [];
+
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) pages.push(i);
+  } else {
+    pages.push(1);
+    if (currentPage > 3) pages.push('ellipsis');
+
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+
+    if (currentPage < totalPages - 2) pages.push('ellipsis');
+    pages.push(totalPages);
+  }
+
+  return (
+    <>
+      {pages.map((p, i) =>
+        p === 'ellipsis' ? (
+          <span key={`e${i}`} className="px-1 text-gray-400 dark:text-gray-500">
+            ...
+          </span>
+        ) : (
+          <button
+            key={p}
+            onClick={() => onPageChange(p)}
+            className={`min-w-[32px] rounded-lg px-2 py-1.5 text-sm font-medium ${
+              currentPage === p
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            {p}
+          </button>
+        )
+      )}
+    </>
   );
 }

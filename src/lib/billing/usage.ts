@@ -112,14 +112,14 @@ export async function incrementMessageCount(userId: string): Promise<void> {
 /**
  * Increment document count for the current billing period.
  */
-export async function incrementDocumentCount(userId: string): Promise<void> {
+export async function incrementDocumentCount(userId: string, count: number = 1): Promise<void> {
   const supabase = createServiceRoleClient();
   const usage = await getOrCreateUsageRecord(userId);
   if (!usage) return;
 
   await supabase
     .from('usage_records')
-    .update({ documents_used: (usage.documents_used ?? 0) + 1 })
+    .update({ documents_used: (usage.documents_used ?? 0) + count })
     .eq('id', usage.id);
 }
 

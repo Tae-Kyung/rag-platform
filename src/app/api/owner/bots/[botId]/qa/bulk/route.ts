@@ -99,32 +99,36 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           return;
         }
 
-        // Phase 2: Insert qa_pairs
-        send({ phase: 'qa', message: 'Saving Q&A pairs...', progress: 10, current: 0, total });
+        // Phase 2: Insert qa_pairs in batches
+        send({ phase: 'qa', message: 'Saving Q&A pairs...', progress: 8, current: 0, total });
 
-        const qaPairsToInsert = items.map((item, i) => ({
-          bot_id: botId,
-          question: item.question.trim(),
-          answer: item.answer.trim(),
-          category: item.category?.trim() || null,
-          document_id: docs[i].id,
-        }));
+        const qaBatchSize = 100;
+        for (let qi = 0; qi < items.length; qi += qaBatchSize) {
+          const qaBatch = items.slice(qi, qi + qaBatchSize).map((item, j) => ({
+            bot_id: botId,
+            question: item.question.trim(),
+            answer: item.answer.trim(),
+            category: item.category?.trim() || null,
+            document_id: docs[qi + j].id,
+          }));
 
-        const { error: qaInsertError } = await supabase
-          .from('qa_pairs')
-          .insert(qaPairsToInsert);
+          const { error: qaInsertError } = await supabase
+            .from('qa_pairs')
+            .insert(qaBatch);
 
-        if (qaInsertError) {
-          await supabase.from('documents').delete().in('id', docs.map((d) => d.id));
-          send({ phase: 'error', message: `Failed to save Q&A: ${qaInsertError.message}` });
-          controller.close();
-          return;
+          if (qaInsertError) {
+            await supabase.from('documents').delete().in('id', docs.map((d) => d.id));
+            send({ phase: 'error', message: `Failed to save Q&A: ${qaInsertError.message}` });
+            controller.close();
+            return;
+          }
+
+          const qaDone = Math.min(qi + qaBatchSize, total);
+          send({ phase: 'qa', message: `Saving Q&A pairs... (${qaDone}/${total})`, progress: 8 + Math.round((qaDone / total) * 5), current: qaDone, total });
         }
 
-        // Track usage
-        for (let i = 0; i < docs.length; i++) {
-          await incrementDocumentCount(userId);
-        }
+        // Track usage (single DB call)
+        await incrementDocumentCount(userId, docs.length);
 
         // Phase 3: Generate embeddings in batches with progress
         const contents = items.map(

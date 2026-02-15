@@ -450,14 +450,20 @@ Phase 8 ──→ Phase 11 (테스트 + 배포)
   - 파일 업로드 드래그&드롭
   - URL 크롤링 입력 폼
   - Q&A 직접 등록 폼
-  - 문서 삭제 (확인 다이얼로그)
+  - 문서 삭제 (확인 모달) + 일괄 삭제 (체크박스 다중 선택 + 확인 모달)
   - 처리 중 상태 폴링 (5초 간격)
+  - 페이지네이션 (20건 단위) + 타입별 필터 탭 (All/File/URL/Q&A 카운트 배지)
+  - Q&A 인라인 편집 모달 (질문 클릭 → 질문/답변/카테고리 수정, 임베딩 자동 재생성)
+  - URL 문서: 페이지 제목 + 원본 URL 링크 표시
+  - 파일 문서: 파일명 클릭 시 다운로드 (signed URL)
 
 - [x] `src/features/dashboard/BotForm.tsx` — 봇 생성·수정 공통 폼
 - [x] `src/features/dashboard/BotCard.tsx` — 봇 카드 컴포넌트
 - [x] `src/features/dashboard/DocumentUploader.tsx` — 파일 업로드 컴포넌트
-- [x] `src/features/dashboard/DocumentList.tsx` — 문서 목록 컴포넌트
+- [x] `src/features/dashboard/DocumentList.tsx` — 문서 목록 컴포넌트 (타입별 FileNameCell: 파일 다운로드, URL 링크, Q&A 편집)
 - [x] `src/features/dashboard/QAPairForm.tsx` — Q&A 등록 컴포넌트
+- [x] `src/app/api/owner/bots/[botId]/qa/[qaId]/route.ts` — Q&A 개별 조회·수정 API (PUT 시 임베딩 재생성)
+- [x] `src/app/api/owner/bots/[botId]/documents/[docId]/download/route.ts` — 파일 다운로드 API (Supabase signed URL)
 
 ### 2.5 Supabase Storage
 
@@ -1206,6 +1212,11 @@ Phase 8 ──→ Phase 11 (테스트 + 배포)
 | 문서 일괄 삭제 (체크박스 다중 선택) | `9ed2302` | `[x]` |
 | Q&A 일괄 업로드 배치 최적화 (타임아웃 수정) | `6ca943c` | `[x]` |
 | qa_pairs document_id FK 추가 (CASCADE 삭제, 데이터 무결성) | `5eae245` | `[x]` |
+| 문서 목록 페이지네이션 + 타입별 필터 탭 (All/File/URL/Q&A) | `037668a` | `[x]` |
+| Q&A 인라인 편집 (모달 수정, 임베딩 재생성) | `037668a` | `[x]` |
+| URL 문서 페이지 제목 표시 + 원본 URL 링크 | `037668a` | `[x]` |
+| 삭제 확인 모달 (브라우저 confirm 대체) | `620db0e` | `[x]` |
+| 파일 다운로드 (파일명 클릭 → signed URL) | `620db0e` | `[x]` |
 
 ---
 

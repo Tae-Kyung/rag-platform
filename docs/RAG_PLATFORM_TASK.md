@@ -401,6 +401,12 @@ Phase 8 ──→ Phase 11 (테스트 + 배포)
   - `DELETE /[qaId]` — Q&A 삭제
   - 플랜별 Q&A 수 체크 (vs max_qa)
 
+- [x] `src/app/api/owner/bots/[botId]/qa/bulk/route.ts`
+  - `POST` — Q&A CSV 일괄 업로드 (SSE 스트리밍 진행률)
+  - 5단계 진행: docs(5%) → qa(10%) → embedding(15-80%) → saving(85-95%) → done(100%)
+  - 배치 처리: qa_pairs 100건, chunks 50건, embeddings EMBEDDING_BATCH_SIZE 단위
+  - `incrementDocumentCount(userId, count)` 단일 호출로 DB 최적화
+
 ### 2.3 RAG 파이프라인 리팩토링
 
 - [x] `src/lib/rag/pipeline.ts` 수정
@@ -461,7 +467,7 @@ Phase 8 ──→ Phase 11 (테스트 + 배포)
 - [x] `src/features/dashboard/BotCard.tsx` — 봇 카드 컴포넌트
 - [x] `src/features/dashboard/DocumentUploader.tsx` — 파일 업로드 컴포넌트
 - [x] `src/features/dashboard/DocumentList.tsx` — 문서 목록 컴포넌트 (타입별 FileNameCell: 파일 다운로드, URL 링크, Q&A 편집)
-- [x] `src/features/dashboard/QAPairForm.tsx` — Q&A 등록 컴포넌트
+- [x] `src/features/dashboard/QAPairForm.tsx` — Q&A 등록 컴포넌트 (CSV 일괄 업로드 SSE 프로그레스 바)
 - [x] `src/app/api/owner/bots/[botId]/qa/[qaId]/route.ts` — Q&A 개별 조회·수정 API (PUT 시 임베딩 재생성)
 - [x] `src/app/api/owner/bots/[botId]/documents/[docId]/download/route.ts` — 파일 다운로드 API (Supabase signed URL)
 
@@ -499,9 +505,11 @@ Phase 8 ──→ Phase 11 (테스트 + 배포)
   - `bots` 테이블에서 설정 로드 (system_prompt, model, temperature, max_tokens)
   - SSE 스트리밍 (meta → content → sources → done)
   - 응답 완료 시: messages INSERT + usage_records INCREMENT
+  - **크로스봇 데이터 격리**: conversation_id가 현재 bot_id 소유인지 검증, 불일치 시 새 대화 생성
 
 - [x] `src/app/api/chat/[conversationId]/route.ts`
   - `GET` — 대화 이력 조회
+  - **봇 소유권 검증**: bot_id 쿼리 파라미터로 대화가 해당 봇 소속인지 확인
 
 - [x] `src/app/api/chat/feedback/route.ts`
   - `POST` — 피드백 제출 (rating 1-5 + comment)
@@ -534,7 +542,8 @@ Phase 8 ──→ Phase 11 (테스트 + 배포)
 
 - [x] 메시지별 피드백 (별점 1-5 + 코멘트) — ChatMessage 컴포넌트 내장
 - [x] `src/lib/billing/usage.ts` — 사용량 추적 유틸리티
-  - `incrementMessageCount`, `checkMessageQuota`, `getCurrentUsage`
+  - `incrementMessageCount(userId, count?)`, `checkMessageQuota`, `getCurrentUsage`
+  - `incrementDocumentCount(userId, count)` — 일괄 업로드 시 단일 DB 호출 지원
 - [x] `src/lib/chat/sources.ts` — 소스 중복 제거
 - [x] `src/lib/chat/history.ts` — 대화 이력 빌더
 
@@ -1217,6 +1226,9 @@ Phase 8 ──→ Phase 11 (테스트 + 배포)
 | URL 문서 페이지 제목 표시 + 원본 URL 링크 | `037668a` | `[x]` |
 | 삭제 확인 모달 (브라우저 confirm 대체) | `620db0e` | `[x]` |
 | 파일 다운로드 (파일명 클릭 → signed URL) | `620db0e` | `[x]` |
+| Q&A 일괄 업로드 실시간 진행률 (SSE 스트리밍 프로그레스 바) | `25cd2d4` | `[x]` |
+| Q&A 일괄 업로드 DB 배치 최적화 (incrementDocumentCount 단일 호출) | `7b12013` | `[x]` |
+| 크로스봇 데이터 누출 수정 (conversation_id 소유권 검증) | `f6ab7bc` | `[x]` |
 
 ---
 

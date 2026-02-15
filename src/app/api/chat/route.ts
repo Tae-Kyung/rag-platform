@@ -108,10 +108,28 @@ export async function POST(request: NextRequest) {
         .single();
       convId = conv?.id;
     } else {
-      await supabase
+      // Verify conversation belongs to this bot
+      const { data: existingConv } = await supabase
         .from('conversations')
-        .update({ language: detectedLang })
-        .eq('id', convId);
+        .select('id')
+        .eq('id', convId)
+        .eq('bot_id', bot_id)
+        .single();
+
+      if (!existingConv) {
+        // Conversation doesn't belong to this bot — create a new one
+        const { data: conv } = await supabase
+          .from('conversations')
+          .insert({ bot_id, language: detectedLang })
+          .select('id')
+          .single();
+        convId = conv?.id;
+      } else {
+        await supabase
+          .from('conversations')
+          .update({ language: detectedLang })
+          .eq('id', convId);
+      }
     }
 
     // Save user message

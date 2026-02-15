@@ -4,10 +4,27 @@ import { successResponse, errorResponse } from '@/lib/api/response';
 
 type RouteParams = { params: Promise<{ conversationId: string }> };
 
-export async function GET(_request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { conversationId } = await params;
+    const { searchParams } = new URL(request.url);
+    const botId = searchParams.get('bot_id');
+
     const supabase = createServiceRoleClient();
+
+    // Verify conversation belongs to the requested bot
+    if (botId) {
+      const { data: conv } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('id', conversationId)
+        .eq('bot_id', botId)
+        .single();
+
+      if (!conv) {
+        return successResponse([]);
+      }
+    }
 
     const { data: messages, error } = await supabase
       .from('messages')

@@ -16,6 +16,7 @@ interface BotInfo {
   model: string;
   temperature: number;
   maxTokens: number;
+  conversationHistoryLimit: number;
 }
 
 const FALLBACK_MESSAGES: Record<string, string> = {
@@ -211,7 +212,7 @@ export async function handleTelegramMessage(
   );
 
   // Get conversation history
-  const chatMessages = await buildChatMessages(supabase, conversationId, systemPrompt);
+  const chatMessages = await buildChatMessages(supabase, conversationId, systemPrompt, botInfo.conversationHistoryLimit);
 
   // Non-streaming OpenAI call
   const openai = getOpenAI();

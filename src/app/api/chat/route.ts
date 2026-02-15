@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Get conversation history
-    const chatMessages = await buildChatMessages(supabase, convId, systemPrompt);
+    const chatMessages = await buildChatMessages(supabase, convId, systemPrompt, bot.conversation_history_limit);
 
     // Stream response from OpenAI using bot's model settings
     const openai = getOpenAI();

@@ -12,6 +12,7 @@ const createBotSchema = z.object({
   model: z.string().default('gpt-4o-mini'),
   temperature: z.number().min(0).max(2).default(0.3),
   max_tokens: z.number().min(100).max(4000).default(1000),
+  conversation_history_limit: z.number().min(1).max(50).default(6),
 });
 
 export async function GET() {
@@ -113,6 +114,7 @@ export async function POST(request: NextRequest) {
         model: parsed.data.model,
         temperature: parsed.data.temperature,
         max_tokens: parsed.data.max_tokens,
+        conversation_history_limit: parsed.data.conversation_history_limit,
       })
       .select()
       .single();

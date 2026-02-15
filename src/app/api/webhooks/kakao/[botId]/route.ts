@@ -55,7 +55,7 @@ export async function POST(
     // Load bot settings
     const { data: bot } = await supabase
       .from('bots')
-      .select('name, system_prompt, model, temperature, max_tokens, is_active')
+      .select('name, system_prompt, model, temperature, max_tokens, conversation_history_limit, is_active')
       .eq('id', botId)
       .single();
 
@@ -82,6 +82,7 @@ export async function POST(
       model: bot.model,
       temperature: bot.temperature,
       maxTokens: bot.max_tokens,
+      conversationHistoryLimit: bot.conversation_history_limit,
     });
 
     return NextResponse.json(buildKakaoResponse(responseText));

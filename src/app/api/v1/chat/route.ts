@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
       searchResults
     );
 
-    const chatMessages = await buildChatMessages(supabase, convId, systemPrompt);
+    const chatMessages = await buildChatMessages(supabase, convId, systemPrompt, bot.conversation_history_limit);
 
     const openai = getOpenAI();
 

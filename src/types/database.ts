@@ -214,6 +214,7 @@ export type Database = {
           model: string;
           temperature: number;
           max_tokens: number;
+          conversation_history_limit: number;
           widget_config: Json;
           rag_config: Json;
           is_active: boolean;
@@ -229,6 +230,7 @@ export type Database = {
           model?: string;
           temperature?: number;
           max_tokens?: number;
+          conversation_history_limit?: number;
           widget_config?: Json;
           rag_config?: Json;
           is_active?: boolean;
@@ -244,6 +246,7 @@ export type Database = {
           model?: string;
           temperature?: number;
           max_tokens?: number;
+          conversation_history_limit?: number;
           widget_config?: Json;
           rag_config?: Json;
           is_active?: boolean;

@@ -10,6 +10,7 @@ interface BotFormData {
   model: string;
   temperature: number;
   max_tokens: number;
+  conversation_history_limit: number;
 }
 
 interface BotFormProps {
@@ -39,6 +40,7 @@ export function BotForm({ mode, botId, initialData }: BotFormProps) {
     model: initialData?.model || 'gpt-4o-mini',
     temperature: initialData?.temperature ?? 0.3,
     max_tokens: initialData?.max_tokens ?? 1000,
+    conversation_history_limit: initialData?.conversation_history_limit ?? 6,
   });
 
   function updateField<K extends keyof BotFormData>(key: K, value: BotFormData[K]) {
@@ -196,7 +198,7 @@ export function BotForm({ mode, botId, initialData }: BotFormProps) {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Model</label>
           <select
@@ -242,6 +244,22 @@ export function BotForm({ mode, botId, initialData }: BotFormProps) {
             onChange={(e) => updateField('max_tokens', parseInt(e.target.value) || 1000)}
             className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">대화 기록 수</label>
+          <input
+            type="number"
+            min={1}
+            max={50}
+            step={1}
+            value={form.conversation_history_limit}
+            onChange={(e) => updateField('conversation_history_limit', parseInt(e.target.value) || 6)}
+            className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+            챗봇이 참고할 이전 대화 수 (1~50)
+          </p>
         </div>
       </div>
 

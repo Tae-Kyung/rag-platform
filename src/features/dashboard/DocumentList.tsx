@@ -6,6 +6,7 @@ interface Document {
   file_type: string;
   file_size: number | null;
   source_url: string | null;
+  storage_path: string | null;
   status: string;
   chunk_count: number;
   created_at: string;
@@ -18,6 +19,7 @@ interface DocumentListProps {
   selectedIds: Set<string>;
   onSelectionChange: (ids: Set<string>) => void;
   onEditQA?: (docId: string) => void;
+  botId: string;
 }
 
 function statusBadge(status: string) {
@@ -71,7 +73,7 @@ function formatDate(dateStr: string) {
   });
 }
 
-function FileNameCell({ doc, onEditQA }: { doc: Document; onEditQA?: (docId: string) => void }) {
+function FileNameCell({ doc, onEditQA, botId }: { doc: Document; onEditQA?: (docId: string) => void; botId: string }) {
   // URL documents: show title as clickable link
   if (doc.file_type === 'url' && doc.source_url) {
     return (
@@ -111,7 +113,40 @@ function FileNameCell({ doc, onEditQA }: { doc: Document; onEditQA?: (docId: str
     );
   }
 
-  // Regular files
+  // Regular files: clickable to download
+  if (doc.storage_path) {
+    async function handleDownload() {
+      try {
+        const res = await fetch(`/api/owner/bots/${botId}/documents/${doc.id}/download`);
+        const json = await res.json();
+        if (json.success && json.data?.url) {
+          const a = document.createElement('a');
+          a.href = json.data.url;
+          a.download = doc.file_name;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        } else {
+          alert('Failed to download file');
+        }
+      } catch {
+        alert('Download failed');
+      }
+    }
+
+    return (
+      <button
+        onClick={handleDownload}
+        className="max-w-[250px] truncate block text-left font-medium text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+        title="Click to download"
+      >
+        {doc.file_name}
+        <span className="ml-1 text-xs text-gray-400">&#8595;</span>
+      </button>
+    );
+  }
+
+  // Fallback: plain text
   return (
     <span className="max-w-[250px] truncate block font-medium text-gray-900 dark:text-white">
       {doc.file_name}
@@ -126,6 +161,7 @@ export function DocumentList({
   selectedIds,
   onSelectionChange,
   onEditQA,
+  botId,
 }: DocumentListProps) {
   if (documents.length === 0) {
     return (
@@ -198,7 +234,7 @@ export function DocumentList({
                 />
               </td>
               <td className="px-3 py-3">
-                <FileNameCell doc={doc} onEditQA={onEditQA} />
+                <FileNameCell doc={doc} onEditQA={onEditQA} botId={botId} />
               </td>
               <td className="px-3 py-3 text-gray-500 dark:text-gray-400">{doc.file_type}</td>
               <td className="px-3 py-3 text-gray-500 dark:text-gray-400">{formatSize(doc.file_size)}</td>

@@ -13,6 +13,7 @@ interface Document {
   file_type: string;
   file_size: number | null;
   source_url: string | null;
+  storage_path: string | null;
   status: string;
   chunk_count: number;
   created_at: string;
@@ -54,6 +55,9 @@ export default function DocumentsPage() {
   const [total, setTotal] = useState(0);
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [counts, setCounts] = useState<TypeCounts>({ all: 0, file: 0, url: 0, qa: 0 });
+
+  // Delete confirmation state
+  const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'single'; docId: string; name: string } | { type: 'bulk'; count: number } | null>(null);
 
   // QA edit modal state
   const [qaEdit, setQaEdit] = useState<QAEditData | null>(null);
@@ -115,46 +119,57 @@ export default function DocumentsPage() {
     fetchDocuments(page);
   }
 
-  async function handleDelete(docId: string) {
-    if (!confirm('Delete this document? All associated chunks will be removed.')) return;
-    setDeleting(docId);
-    try {
-      await fetch(`/api/owner/bots/${botId}/documents/${docId}`, { method: 'DELETE' });
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-        next.delete(docId);
-        return next;
-      });
-      fetchDocuments();
-    } catch {
-      alert('Failed to delete document');
-    } finally {
-      setDeleting(null);
-    }
+  function handleDeleteRequest(docId: string) {
+    const doc = documents.find((d) => d.id === docId);
+    setDeleteConfirm({ type: 'single', docId, name: doc?.file_name || 'this document' });
   }
 
-  async function handleBulkDelete() {
+  function handleBulkDeleteRequest() {
     if (selectedIds.size === 0) return;
-    if (!confirm(`Delete ${selectedIds.size} selected document(s)? All associated chunks will be removed.`)) return;
+    setDeleteConfirm({ type: 'bulk', count: selectedIds.size });
+  }
 
-    setBulkDeleting(true);
-    try {
-      const res = await fetch(`/api/owner/bots/${botId}/documents/bulk-delete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: Array.from(selectedIds) }),
-      });
-      const json = await res.json();
-      if (!json.success) {
-        alert(json.error || 'Failed to delete documents');
-      } else {
-        setSelectedIds(new Set());
+  async function confirmDelete() {
+    if (!deleteConfirm) return;
+
+    if (deleteConfirm.type === 'single') {
+      const { docId } = deleteConfirm;
+      setDeleteConfirm(null);
+      setDeleting(docId);
+      try {
+        await fetch(`/api/owner/bots/${botId}/documents/${docId}`, { method: 'DELETE' });
+        setSelectedIds((prev) => {
+          const next = new Set(prev);
+          next.delete(docId);
+          return next;
+        });
+        fetchDocuments();
+      } catch {
+        alert('Failed to delete document');
+      } finally {
+        setDeleting(null);
       }
-      fetchDocuments();
-    } catch {
-      alert('Failed to delete documents');
-    } finally {
-      setBulkDeleting(false);
+    } else {
+      setDeleteConfirm(null);
+      setBulkDeleting(true);
+      try {
+        const res = await fetch(`/api/owner/bots/${botId}/documents/bulk-delete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: Array.from(selectedIds) }),
+        });
+        const json = await res.json();
+        if (!json.success) {
+          alert(json.error || 'Failed to delete documents');
+        } else {
+          setSelectedIds(new Set());
+        }
+        fetchDocuments();
+      } catch {
+        alert('Failed to delete documents');
+      } finally {
+        setBulkDeleting(false);
+      }
     }
   }
 
@@ -318,7 +333,7 @@ export default function DocumentsPage() {
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Documents</h3>
           {selectedIds.size > 0 && (
             <button
-              onClick={handleBulkDelete}
+              onClick={handleBulkDeleteRequest}
               disabled={bulkDeleting}
               className="rounded-lg bg-red-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
             >
@@ -361,11 +376,12 @@ export default function DocumentsPage() {
         <div className="mt-4">
           <DocumentList
             documents={documents}
-            onDelete={handleDelete}
+            onDelete={handleDeleteRequest}
             deleting={deleting}
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}
             onEditQA={handleEditQA}
+            botId={botId}
           />
         </div>
 
@@ -399,6 +415,38 @@ export default function DocumentsPage() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setDeleteConfirm(null)}>
+          <div
+            className="mx-4 w-full max-w-sm rounded-xl bg-white dark:bg-gray-800 shadow-xl p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Confirm Delete</h3>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              {deleteConfirm.type === 'single'
+                ? <>Are you sure you want to delete <span className="font-medium text-gray-900 dark:text-white">{deleteConfirm.name}</span>? All associated chunks will be removed.</>
+                : <>Are you sure you want to delete <span className="font-medium text-gray-900 dark:text-white">{deleteConfirm.count} documents</span>? All associated chunks will be removed.</>
+              }
+            </p>
+            <div className="mt-5 flex justify-end gap-3">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* QA Edit Modal */}
       {(qaEdit || qaEditLoading) && (

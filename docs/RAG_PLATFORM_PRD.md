@@ -10,7 +10,7 @@
 ## 1. 제품 개요
 
 ### 1.1 비전
-누구나 자신의 문서·URL·Q&A를 업로드하여 **AI 챗봇을 즉시 생성**하고, 웹·텔레그램·위챗·카카오톡 등 다양한 채널에 배포할 수 있는 **RAG-as-a-Service 플랫폼**.
+누구나 자신의 문서·URL·Q&A를 업로드하여 **AI 챗봇을 즉시 생성**하고, 웹·텔레그램·위챗·카카오톡·WhatsApp 등 다양한 채널에 배포할 수 있는 **RAG-as-a-Service 플랫폼**.
 
 ### 1.2 브랜드
 | 항목 | 내용 |
@@ -22,7 +22,7 @@
 
 ### 1.3 핵심 가치
 - **5분 안에 챗봇 생성** — 가입 → 문서 업로드 → 챗봇 배포
-- **멀티채널 통합** — 웹 위젯, 텔레그램, 위챗, 카카오톡
+- **멀티채널 통합** — 웹 위젯, 텔레그램, 위챗, 카카오톡, WhatsApp
 - **API 제공** — 유료 사용자는 API 키로 자체 시스템에 통합
 - **투명한 요금** — 무료 체험 후 합리적 월정액 구독
 
@@ -52,7 +52,7 @@
 | **문서 용량** | 1MB (최대 3건) | 10MB (최대 20건) | 100MB (최대 100건) | 무제한 |
 | **지원 파일** | PDF, TXT, URL | + DOCX, XLSX, HWP | + 모든 포맷 | + 모든 포맷 |
 | **Q&A 직접 등록** | 10건 | 100건 | 1,000건 | 무제한 |
-| **채널 연동** | 웹 위젯 | + Telegram | + WeChat, KakaoTalk | + 모든 채널 + 커스텀 |
+| **채널 연동** | 웹 위젯 | + Telegram | + WeChat, KakaoTalk, WhatsApp | + 모든 채널 + 커스텀 |
 | **API 액세스** | ✗ | ✗ | ✓ (Rate limit: 60 req/min) | ✓ (Rate limit: 300 req/min) |
 | **팀 멤버** | 1 | 2 | 5 | 무제한 |
 | **분석·통계** | 기본 | 대화 분석 | + 감성 분석, 키워드 트렌드 | + 커스텀 리포트 |
@@ -104,7 +104,7 @@
 #### 4.2.2 지식 베이스 (Knowledge Base)
 - **문서 업로드**: PDF, TXT, DOCX, XLSX, HWP, CSV, Markdown
 - **URL 크롤링**: 단일 URL 또는 사이트맵 기반 일괄 크롤링
-- **Q&A 직접 등록**: 질문-답변 쌍 수동 입력
+- **Q&A 직접 등록**: 질문-답변 쌍 수동 입력 + CSV 일괄 업로드 (RFC 4180 호환 파서, 템플릿 제공)
 - 문서별 처리 상태 표시 (pending → processing → completed/failed)
 - 문서별 청크 수, 토큰 수 표시
 - 문서 삭제 시 관련 청크·임베딩 자동 정리
@@ -131,6 +131,11 @@
 - 위챗 공식계정(公众号) 연동
 - 메시지 XML 파싱 + 응답
 - 위챗 서비스 계정 필요
+
+**WhatsApp** (Pro 이상)
+- WhatsApp Business API 연동
+- Webhook 기반 메시지 수신·응답
+- Meta Business 계정 필요
 
 #### 4.2.4 API 액세스 (Pro 이상)
 ```
@@ -231,7 +236,7 @@ Content-Type: application/json
 | **배포** | Vercel | Serverless Functions |
 | **모니터링** | Vercel Analytics + 커스텀 로깅 | |
 | **이메일** | Resend (또는 Supabase Auth 기본) | 가입 확인, 알림 |
-| **i18n** | next-intl | ko, en (구현 완료), zh, ja (확장 가능) |
+| **i18n** | next-intl | ko, en (구현 완료), zh, ja (확장 가능), IP 기반 자동 언어 감지 |
 | **테마** | next-themes + Tailwind CSS `dark:` | 다크/라이트 모드 전환 (전체 페이지 적용 완료) |
 
 ### 5.2 시스템 아키텍처
@@ -593,7 +598,7 @@ CREATE POLICY "Bot owners read messages" ON messages FOR SELECT
 | **Owner - API Keys** | `GET/POST/DELETE /api/owner/api-keys` |
 | **Owner - Team** | `GET/POST/DELETE /api/owner/team` |
 | **Chat** | `POST /api/chat` (End User용, 인증 불요) |
-| **Webhooks** | `POST /api/webhooks/paddle`, `POST /api/webhooks/telegram/{botId}`, `POST /api/webhooks/kakao/{botId}`, `POST /api/webhooks/wechat/{botId}` |
+| **Webhooks** | `POST /api/webhooks/paddle`, `POST /api/webhooks/telegram/{botId}`, `POST /api/webhooks/kakao/{botId}`, `POST /api/webhooks/whatsapp/{botId}`, `POST /api/webhooks/wechat/{botId}` |
 | **System Admin** | `GET /api/sys/users`, `GET /api/sys/traffic`, `GET /api/sys/revenue`, `GET /api/sys/system-status`, `PUT /api/sys/users/{id}` |
 
 ---
@@ -731,6 +736,7 @@ k-chatbot에서 **그대로 재사용**하는 모듈:
 ### Phase 5: 채널 연동 (2주) ✅
 - [x] Telegram 봇 동적 등록·Webhook
 - [x] KakaoTalk 스킬 서버 연동
+- [x] WhatsApp Business API 연동
 - [ ] WeChat 공식계정 메시지 처리
 - [x] 채널 관리 UI (토큰 입력, 활성/비활성)
 - [x] 채널별 대화 구분
@@ -783,6 +789,18 @@ k-chatbot에서 **그대로 재사용**하는 모듈:
 - [ ] 커스텀 도메인 설정
 - [ ] 모니터링 알림 설정
 
+### Phase 12.5: WhatsApp 연동 ✅
+- [x] WhatsApp Business API Webhook 핸들러 (`/api/webhooks/whatsapp/[botId]`)
+- [x] WhatsApp 메시지 수신·응답 처리
+- [x] 채널 관리 UI 추가 (`WhatsAppSetup.tsx`)
+- [x] 채널 CRUD API
+- [x] `whatsapp_user_mappings` 테이블 추가
+
+### Phase 13: WeChat 연동
+- [ ] 위챗 공식계정 개발자 설정
+- [ ] XML 메시지 파싱·응답 핸들러
+- [ ] 채널 관리 UI 추가
+
 ### Post-MVP 완료 작업
 - [x] KakaoTalk 채널 연동 (Phase 12)
 - [x] Docs 허브 (사용자 가이드 + 개발자 가이드)
@@ -793,6 +811,16 @@ k-chatbot에서 **그대로 재사용**하는 모듈:
 - [x] 인증 기반 네비게이션 (로그인/비로그인 분기)
 - [x] 대시보드 사이드바 Admin 링크 (admin 역할 전용)
 - [x] 다양한 버그 수정 (빌링 크래시, 다크 모드 텍스트, Vercel 배포)
+- [x] WhatsApp Business API 채널 연동
+- [x] KakaoTalk Open Builder 스킬 설정 가이드 (사용자 문서)
+- [x] Bot ID 표시 + 복사 버튼 (봇 상세 페이지)
+- [x] Admin 메시지 카운트 수정 + KST 자동 다크 모드
+- [x] IP 기반 동적 언어 감지 (한국 IP → 한국어, 해외 → 영어)
+- [x] CSV Q&A 일괄 업로드 + 템플릿 제공 (RFC 4180, BOM, CP949, 자동 컬럼 매핑)
+- [x] Excel → CSV 변환 가이드 (Q&A 업로드 섹션)
+- [x] 문서 일괄 삭제 (체크박스 다중 선택)
+- [x] Q&A 일괄 업로드 배치 최적화 (타임아웃 수정)
+- [x] qa_pairs document_id FK 추가 (CASCADE 삭제, 데이터 무결성)
 
 **총 예상 기간: 약 14주 (3.5개월)**
 
@@ -838,7 +866,7 @@ k-chatbot에서 **그대로 재사용**하는 모듈:
 
 → AskDocs는 **Dante AI와 동등 수준**의 가격대로, 시장 중간 포지셔닝.
 → Chatbase/Botpress 대비 **가격 경쟁력** 확보.
-→ 핵심 차별화: **멀티채널 통합** (Telegram + KakaoTalk + WeChat) + **한국어 최적화 RAG**.
+→ 핵심 차별화: **멀티채널 통합** (Telegram + KakaoTalk + WhatsApp + WeChat) + **한국어 최적화 RAG**.
 
 ---
 

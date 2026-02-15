@@ -1115,6 +1115,13 @@ Phase 8 ──→ Phase 11 (테스트 + 배포)
 - [x] 채널 CRUD API (`/api/owner/bots/[botId]/channels/kakao`)
 - [x] KakaoTalk 핸들러 (`src/lib/channels/kakao/handler.ts`)
 
+### Phase 12.5: WhatsApp 연동 ✅
+- [x] WhatsApp Business API Webhook 핸들러 (`/api/webhooks/whatsapp/[botId]`)
+- [x] WhatsApp 메시지 수신·응답 처리
+- [x] 채널 관리 UI 추가 (`WhatsAppSetup.tsx`)
+- [x] 채널 CRUD API
+- [x] `whatsapp_user_mappings` 테이블 + 마이그레이션
+
 ### Phase 13: WeChat 연동
 - [ ] 위챗 공식계정 개발자 설정
 - [ ] XML 메시지 파싱·응답 핸들러
@@ -1137,7 +1144,7 @@ Phase 8 ──→ Phase 11 (테스트 + 배포)
 - [ ] DOCX 파서 (mammoth 라이브러리)
 - [ ] XLSX 파서 (xlsx 라이브러리)
 - [ ] HWP 파서 (hwp.js)
-- [ ] CSV 파서 (papaparse)
+- [x] CSV 파서 (자체 RFC 4180 호환 파서, BOM/CP949/자동 컬럼 매핑)
 - [ ] Markdown 파서
 
 ### Phase 17: 자동 재크롤링
@@ -1169,6 +1176,7 @@ Phase 8 ──→ Phase 11 (테스트 + 배포)
 | 10 | 랜딩 + 마케팅 | 1주 | `[x]` | — (병렬) |
 | 11 | 테스트 + 배포 | 1주 | `[~]` | 전체 |
 | 12 | KakaoTalk 연동 | — | `[x]` | Phase 5 |
+| 12.5 | WhatsApp 연동 | — | `[x]` | Phase 5 |
 | **합계** | | **14주** | | |
 
 ### Post-MVP 추가 작업
@@ -1187,6 +1195,17 @@ Phase 8 ──→ Phase 11 (테스트 + 배포)
 | 빌링 페이지 크래시 수정 + 회원가입 emailRedirectTo 추가 | `9db1f8f` | `[x]` |
 | 다크 모드 텍스트 가시성 수정 | `8c9bdc2` | `[x]` |
 | Vercel 배포 수정 (route-level maxDuration) | `6170e59` | `[x]` |
+| WhatsApp Business API 채널 연동 | `3471c3f` | `[x]` |
+| KakaoTalk Open Builder 스킬 설정 가이드 (사용자 문서) | `242edde` | `[x]` |
+| Bot ID 표시 + 복사 버튼 (봇 상세 페이지) | `3a74919` | `[x]` |
+| Admin 메시지 카운트 수정 + KST 자동 다크 모드 | `14d8a73` | `[x]` |
+| IP 기반 동적 언어 감지 (한국 IP → 한국어, 해외 → 영어) | — | `[x]` |
+| CSV Q&A 일괄 업로드 + 템플릿 제공 | — | `[x]` |
+| CSV 파서 업그레이드 (RFC 4180, BOM, CP949, 자동 컬럼 매핑) | `7d01df0` | `[x]` |
+| Excel → CSV 변환 가이드 (Q&A 업로드 섹션) | `4c4e5f8` | `[x]` |
+| 문서 일괄 삭제 (체크박스 다중 선택) | `9ed2302` | `[x]` |
+| Q&A 일괄 업로드 배치 최적화 (타임아웃 수정) | `6ca943c` | `[x]` |
+| qa_pairs document_id FK 추가 (CASCADE 삭제, 데이터 무결성) | `5eae245` | `[x]` |
 
 ---
 

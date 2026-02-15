@@ -190,6 +190,11 @@ export function QAPairForm({ botId, onCreated }: QAPairFormProps) {
   });
   const [needsManualMapping, setNeedsManualMapping] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{
+    phase: string;
+    message: string;
+    progress: number;
+  } | null>(null);
   const [uploadResult, setUploadResult] = useState<{
     success: number;
     failed: number;
@@ -304,6 +309,7 @@ export function QAPairForm({ botId, onCreated }: QAPairFormProps) {
     setUploading(true);
     setError('');
     setUploadResult(null);
+    setUploadProgress({ phase: 'start', message: 'Starting upload...', progress: 0 });
 
     try {
       const res = await fetch(`/api/owner/bots/${botId}/qa/bulk`, {
@@ -312,21 +318,71 @@ export function QAPairForm({ botId, onCreated }: QAPairFormProps) {
         body: JSON.stringify({ items: csvPreview }),
       });
 
-      const json = await res.json();
-
-      if (!json.success) {
+      // Check if it's a JSON error response (validation failed before streaming)
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const json = await res.json();
         setError(json.error || 'Failed to upload Q&A pairs');
+        setUploadProgress(null);
+        setUploading(false);
         return;
       }
 
-      setUploadResult({ success: json.data.success, failed: json.data.failed });
-      setCsvFile(null);
-      setParsedCSV(null);
-      setNeedsManualMapping(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      onCreated();
+      // Read SSE stream
+      const reader = res.body?.getReader();
+      if (!reader) {
+        setError('Failed to read response stream');
+        setUploadProgress(null);
+        setUploading(false);
+        return;
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
+
+            if (data.phase === 'error') {
+              setError(data.message);
+              setUploadProgress(null);
+              setUploading(false);
+              return;
+            }
+
+            if (data.phase === 'done') {
+              setUploadResult({ success: data.success, failed: data.failed });
+              setUploadProgress(null);
+              setCsvFile(null);
+              setParsedCSV(null);
+              setNeedsManualMapping(false);
+              if (fileInputRef.current) fileInputRef.current.value = '';
+              onCreated();
+            } else {
+              setUploadProgress({
+                phase: data.phase,
+                message: data.message,
+                progress: data.progress,
+              });
+            }
+          } catch {
+            // skip malformed SSE lines
+          }
+        }
+      }
     } catch {
       setError('Network error. Please try again.');
+      setUploadProgress(null);
     } finally {
       setUploading(false);
     }
@@ -520,6 +576,26 @@ export function QAPairForm({ botId, onCreated }: QAPairFormProps) {
                 </p>
               )}
             </div>
+            {/* Progress bar */}
+            {uploading && uploadProgress && (
+              <div className="mt-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    {uploadProgress.message}
+                  </span>
+                  <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                    {uploadProgress.progress}%
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                    style={{ width: `${uploadProgress.progress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="mt-3 flex gap-2">
               <button
                 onClick={handleCSVUpload}

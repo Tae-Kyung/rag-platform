@@ -31,9 +31,10 @@ interface TypeCounts {
   file: number;
   url: number;
   qa: number;
+  text: number;
 }
 
-type FilterType = 'all' | 'file' | 'url' | 'qa';
+type FilterType = 'all' | 'file' | 'url' | 'qa' | 'text';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -47,14 +48,17 @@ export default function DocumentsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [crawlUrl, setCrawlUrl] = useState('');
   const [crawling, setCrawling] = useState(false);
-  const [activeSection, setActiveSection] = useState<'upload' | 'crawl' | 'qa'>('upload');
+  const [pasteTitle, setPasteTitle] = useState('');
+  const [pasteContent, setPasteContent] = useState('');
+  const [pasting, setPasting] = useState(false);
+  const [activeSection, setActiveSection] = useState<'upload' | 'crawl' | 'qa' | 'text'>('upload');
 
   // Pagination & filter state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [filterType, setFilterType] = useState<FilterType>('all');
-  const [counts, setCounts] = useState<TypeCounts>({ all: 0, file: 0, url: 0, qa: 0 });
+  const [counts, setCounts] = useState<TypeCounts>({ all: 0, file: 0, url: 0, qa: 0, text: 0 });
 
   // Delete confirmation state
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'single'; docId: string; name: string } | { type: 'bulk'; count: number } | null>(null);
@@ -197,6 +201,31 @@ export default function DocumentsPage() {
     }
   }
 
+  async function handlePasteText(e: React.FormEvent) {
+    e.preventDefault();
+    if (!pasteTitle.trim() || !pasteContent.trim()) return;
+    setPasting(true);
+    try {
+      const res = await fetch(`/api/owner/bots/${botId}/documents/text`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: pasteTitle.trim(), content: pasteContent.trim() }),
+      });
+      const json = await res.json();
+      if (!json.success) {
+        alert(json.error || 'Failed to add text');
+      } else {
+        setPasteTitle('');
+        setPasteContent('');
+        fetchDocuments();
+      }
+    } catch {
+      alert('Network error');
+    } finally {
+      setPasting(false);
+    }
+  }
+
   async function handleEditQA(docId: string) {
     setQaEditLoading(true);
     try {
@@ -251,6 +280,7 @@ export default function DocumentsPage() {
     { key: 'file', label: 'File', count: counts.file },
     { key: 'url', label: 'URL', count: counts.url },
     { key: 'qa', label: 'Q&A', count: counts.qa },
+    { key: 'text', label: 'Text', count: counts.text },
   ];
 
   if (loading && documents.length === 0) {
@@ -281,7 +311,7 @@ export default function DocumentsPage() {
       {/* Add content section */}
       <div className="mt-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6">
         <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700 pb-3">
-          {(['upload', 'crawl', 'qa'] as const).map((section) => (
+          {(['upload', 'crawl', 'qa', 'text'] as const).map((section) => (
             <button
               key={section}
               onClick={() => setActiveSection(section)}
@@ -291,7 +321,7 @@ export default function DocumentsPage() {
                   : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
-              {section === 'upload' ? 'Upload File' : section === 'crawl' ? 'Crawl URL' : 'Add Q&A'}
+              {section === 'upload' ? 'Upload File' : section === 'crawl' ? 'Crawl URL' : section === 'qa' ? 'Add Q&A' : 'Paste Text'}
             </button>
           ))}
         </div>
@@ -323,6 +353,34 @@ export default function DocumentsPage() {
 
           {activeSection === 'qa' && (
             <QAPairForm botId={botId} onCreated={fetchDocuments} />
+          )}
+
+          {activeSection === 'text' && (
+            <form onSubmit={handlePasteText} className="space-y-3">
+              <input
+                type="text"
+                required
+                value={pasteTitle}
+                onChange={(e) => setPasteTitle(e.target.value)}
+                placeholder="Document title"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <textarea
+                required
+                value={pasteContent}
+                onChange={(e) => setPasteContent(e.target.value)}
+                placeholder="Paste your text content here..."
+                rows={8}
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <button
+                type="submit"
+                disabled={pasting}
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                {pasting ? 'Adding...' : 'Add Text'}
+              </button>
+            </form>
           )}
         </div>
       </div>

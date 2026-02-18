@@ -38,8 +38,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       query = query.eq('file_type', 'url');
     } else if (type === 'qa') {
       query = query.eq('file_type', 'qa');
+    } else if (type === 'text') {
+      query = query.eq('file_type', 'text');
     } else if (type === 'file') {
-      query = query.not('file_type', 'in', '("url","qa")');
+      query = query.not('file_type', 'in', '("url","qa","text")');
     }
 
     const { data, error, count } = await query
@@ -55,11 +57,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       { count: fileCount },
       { count: urlCount },
       { count: qaCount },
+      { count: textCount },
       { count: allCount },
     ] = await Promise.all([
-      supabase.from('documents').select('id', { count: 'exact', head: true }).eq('bot_id', botId).not('file_type', 'in', '("url","qa")'),
+      supabase.from('documents').select('id', { count: 'exact', head: true }).eq('bot_id', botId).not('file_type', 'in', '("url","qa","text")'),
       supabase.from('documents').select('id', { count: 'exact', head: true }).eq('bot_id', botId).eq('file_type', 'url'),
       supabase.from('documents').select('id', { count: 'exact', head: true }).eq('bot_id', botId).eq('file_type', 'qa'),
+      supabase.from('documents').select('id', { count: 'exact', head: true }).eq('bot_id', botId).eq('file_type', 'text'),
       supabase.from('documents').select('id', { count: 'exact', head: true }).eq('bot_id', botId),
     ]);
 
@@ -74,6 +78,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         file: fileCount ?? 0,
         url: urlCount ?? 0,
         qa: qaCount ?? 0,
+        text: textCount ?? 0,
       },
     });
   } catch (err) {

@@ -99,6 +99,7 @@
 - 시스템 프롬프트 (봇 성격·역할 지정)
 - 응답 언어 설정 (자동 감지 / 고정)
 - LLM 파라미터 조정 (temperature, max tokens)
+- 대화 기록 수 설정 (conversation_history_limit, 1~50, 기본 6) — 챗봇이 참고할 이전 대화 수
 - 커스텀 도메인 (Enterprise)
 
 #### 4.2.2 지식 베이스 (Knowledge Base)
@@ -392,6 +393,7 @@ CREATE TABLE bots (
   llm_model       TEXT DEFAULT 'gpt-4o-mini',
   temperature     NUMERIC DEFAULT 0.7,
   max_tokens      INTEGER DEFAULT 1024,
+  conversation_history_limit INTEGER NOT NULL DEFAULT 6 CHECK (conversation_history_limit BETWEEN 1 AND 50),
   is_active       BOOLEAN DEFAULT TRUE,
   custom_domain   TEXT,
   created_at      TIMESTAMPTZ DEFAULT now(),
@@ -834,6 +836,7 @@ k-chatbot에서 **그대로 재사용**하는 모듈:
 - [x] Q&A 일괄 업로드 실시간 진행률 표시 (SSE 스트리밍, 단계별 프로그레스 바)
 - [x] Q&A 일괄 업로드 DB 배치 최적화 (N*2 DB 호출 → 단일 호출로 개선)
 - [x] 크로스봇 데이터 누출 수정 (conversation_id 소유권 검증, 봇 간 데이터 격리)
+- [x] 봇별 대화 기록 수 설정 (conversation_history_limit 1~50, DB 마이그레이션+API+UI+전 채널 적용)
 
 **총 예상 기간: 약 14주 (3.5개월)**
 

@@ -1229,6 +1229,7 @@ Phase 8 ──→ Phase 11 (테스트 + 배포)
 | Q&A 일괄 업로드 실시간 진행률 (SSE 스트리밍 프로그레스 바) | `25cd2d4` | `[x]` |
 | Q&A 일괄 업로드 DB 배치 최적화 (incrementDocumentCount 단일 호출) | `7b12013` | `[x]` |
 | 크로스봇 데이터 누출 수정 (conversation_id 소유권 검증) | `f6ab7bc` | `[x]` |
+| 봇별 대화 기록 수 설정 (conversation_history_limit 1~50, DB+API+UI+채널) | `03e5363` | `[x]` |
 
 ---
 

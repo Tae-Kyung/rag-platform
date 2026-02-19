@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { requireOwner, AuthError } from '@/lib/auth/guards';
 import { createClient } from '@/lib/supabase/server';
 import { setWebhook } from '@/lib/channels/telegram/api';
+import { registerSlashCommand, getBotInviteUrl } from '@/lib/channels/discord/api';
 import { checkChannelAccess } from '@/lib/billing/plan-guard';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import type { BotChannel } from '@/types';
@@ -55,7 +56,7 @@ export async function POST(
       return errorResponse('channel and config are required', 400);
     }
 
-    if (!['telegram', 'kakao', 'whatsapp', 'wechat', 'api'].includes(channel)) {
+    if (!['telegram', 'kakao', 'whatsapp', 'discord', 'wechat', 'api'].includes(channel)) {
       return errorResponse('Invalid channel type', 400);
     }
 
@@ -176,6 +177,53 @@ export async function POST(
           bot_id: botId,
           channel: 'whatsapp',
           config: configData,
+          is_active: true,
+        })
+        .select()
+        .single();
+
+      if (error) return errorResponse(error.message, 500);
+      return successResponse(created, 201);
+    }
+
+    // For Discord: validate application_id, bot_token, public_key, register slash command
+    if (channel === 'discord') {
+      const applicationId = config.application_id;
+      const discordBotToken = config.bot_token;
+      const discordPublicKey = config.public_key;
+
+      if (!applicationId || typeof applicationId !== 'string') {
+        return errorResponse('application_id is required for Discord', 400);
+      }
+      if (!discordBotToken || typeof discordBotToken !== 'string') {
+        return errorResponse('bot_token is required for Discord', 400);
+      }
+      if (!discordPublicKey || typeof discordPublicKey !== 'string') {
+        return errorResponse('public_key is required for Discord', 400);
+      }
+
+      // Register /ask slash command
+      const cmdResult = await registerSlashCommand(applicationId, discordBotToken);
+      if (!cmdResult.ok) {
+        return errorResponse(`Failed to register Discord slash command: ${cmdResult.error}`, 400);
+      }
+
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const webhookUrl = `${appUrl}/api/webhooks/discord/${botId}`;
+      const inviteUrl = getBotInviteUrl(applicationId);
+
+      const { data: created, error } = await supabase
+        .from('channel_configs')
+        .insert({
+          bot_id: botId,
+          channel: 'discord',
+          config: {
+            application_id: applicationId,
+            bot_token: discordBotToken,
+            public_key: discordPublicKey,
+            webhook_url: webhookUrl,
+            invite_url: inviteUrl,
+          },
           is_active: true,
         })
         .select()

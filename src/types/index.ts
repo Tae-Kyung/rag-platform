@@ -1,6 +1,6 @@
 export type PlanId = 'free' | 'starter' | 'pro' | 'enterprise';
 export type UserRole = 'user' | 'admin';
-export type BotChannel = 'web' | 'telegram' | 'kakao' | 'whatsapp' | 'wechat' | 'api';
+export type BotChannel = 'web' | 'telegram' | 'kakao' | 'whatsapp' | 'discord' | 'wechat' | 'api';
 export type SubscriptionStatus = 'active' | 'canceled' | 'past_due' | 'trialing';
 export type DocumentStatus = 'pending' | 'processing' | 'completed' | 'failed';
 

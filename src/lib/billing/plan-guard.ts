@@ -202,9 +202,9 @@ export async function checkChannelAccess(
   // Channel access by plan
   const channelAccess: Record<string, BotChannel[]> = {
     free: ['web'],
-    starter: ['web', 'telegram'],
-    pro: ['web', 'telegram', 'kakao', 'whatsapp', 'wechat', 'api'],
-    enterprise: ['web', 'telegram', 'kakao', 'whatsapp', 'wechat', 'api'],
+    starter: ['web', 'telegram', 'discord'],
+    pro: ['web', 'telegram', 'kakao', 'whatsapp', 'discord', 'wechat', 'api'],
+    enterprise: ['web', 'telegram', 'kakao', 'whatsapp', 'discord', 'wechat', 'api'],
   };
 
   const allowed = channelAccess[planId] ?? channelAccess.free;

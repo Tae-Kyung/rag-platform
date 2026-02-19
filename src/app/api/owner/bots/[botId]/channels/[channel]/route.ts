@@ -138,6 +138,15 @@ export async function DELETE(
         .eq('bot_id', botId);
     }
 
+    // For Discord: clean up user mappings
+    if (channel === 'discord') {
+      const serviceClient = createServiceRoleClient();
+      await serviceClient
+        .from('discord_user_mappings')
+        .delete()
+        .eq('bot_id', botId);
+    }
+
     const { error } = await supabase
       .from('channel_configs')
       .delete()

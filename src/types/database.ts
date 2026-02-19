@@ -660,6 +660,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      discord_user_mappings: {
+        Row: {
+          id: string;
+          discord_user_id: string;
+          bot_id: string;
+          conversation_id: string;
+          language: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          discord_user_id: string;
+          bot_id: string;
+          conversation_id: string;
+          language?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          discord_user_id?: string;
+          bot_id?: string;
+          conversation_id?: string;
+          language?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

@@ -1,7 +1,6 @@
 import { NextRequest } from 'next/server';
 import { requireOwner, requirePlan, AuthError } from '@/lib/auth/guards';
 import { createServiceRoleClient } from '@/lib/supabase/service';
-import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import { getOpenAI } from '@/lib/openai/client';
 import { LLM_MODEL } from '@/config/constants';
@@ -22,30 +21,6 @@ const FAILURE_PATTERNS = [
 ];
 
 /**
- * Check if user has at least starter plan (without throwing).
- */
-async function checkPlanEligible(): Promise<boolean> {
-  try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
-
-    const { data: subscription } = await supabase
-      .from('subscriptions')
-      .select('plan_id, status')
-      .eq('user_id', user.id)
-      .single();
-
-    if (!subscription || subscription.status !== 'active') return false;
-
-    const planOrder: PlanId[] = ['free', 'starter', 'pro', 'enterprise'];
-    return planOrder.indexOf(subscription.plan_id as PlanId) >= planOrder.indexOf('starter');
-  } catch {
-    return false;
-  }
-}
-
-/**
  * GET /api/owner/bots/[botId]/enhance-prompt
  * Check eligibility: plan level + user message count >= 100.
  */
@@ -55,11 +30,21 @@ export async function GET(
 ) {
   try {
     const { botId } = await params;
-    await requireOwner(botId);
-
-    const planEligible = await checkPlanEligible();
+    const user = await requireOwner(botId);
 
     const supabase = createServiceRoleClient();
+
+    // Check plan using service client (bypasses RLS)
+    const { data: subscription } = await supabase
+      .from('subscriptions')
+      .select('plan_id, status')
+      .eq('user_id', user.id)
+      .single();
+
+    const planOrder: PlanId[] = ['free', 'starter', 'pro', 'enterprise'];
+    const planEligible = !!subscription &&
+      subscription.status === 'active' &&
+      planOrder.indexOf(subscription.plan_id as PlanId) >= planOrder.indexOf('starter');
 
     // Get conversation IDs for this bot
     const { data: conversations } = await supabase

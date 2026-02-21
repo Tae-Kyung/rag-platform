@@ -46,29 +46,17 @@ export async function GET(
       subscription.status === 'active' &&
       planOrder.indexOf(subscription.plan_id as PlanId) >= planOrder.indexOf('starter');
 
-    // Get conversation IDs for this bot
-    const { data: conversations } = await supabase
-      .from('conversations')
-      .select('id')
-      .eq('bot_id', botId);
-
-    const conversationIds = conversations?.map((c) => c.id) ?? [];
-
-    if (conversationIds.length === 0) {
-      return successResponse({
-        eligible: false,
-        planEligible,
-        userMessageCount: 0,
-        requiredCount: REQUIRED_MESSAGE_COUNT,
-      });
-    }
-
-    // Count user messages across all conversations
-    const { count } = await supabase
+    // Count user messages via join (avoids .in() URL length limit with many conversations)
+    const { count, error: countError } = await supabase
       .from('messages')
-      .select('id', { count: 'exact', head: true })
-      .in('conversation_id', conversationIds)
+      .select('id, conversations!inner(bot_id)', { count: 'exact', head: true })
+      .eq('conversations.bot_id', botId)
       .eq('role', 'user');
+
+    if (countError) {
+      console.error('Enhance prompt count error:', countError);
+      return errorResponse('Failed to count messages', 500);
+    }
 
     const userMessageCount = count ?? 0;
 

@@ -10,9 +10,11 @@ interface BotDetail {
   name: string;
   description: string | null;
   system_prompt: string | null;
+  suggested_questions: string[];
   model: string;
   temperature: number;
   max_tokens: number;
+  conversation_history_limit: number;
   is_active: boolean;
   document_count: number;
   conversation_count: number;
@@ -193,9 +195,11 @@ export default function BotDetailPage() {
                   name: bot.name,
                   description: bot.description || '',
                   system_prompt: bot.system_prompt || '',
+                  suggested_questions: bot.suggested_questions || [],
                   model: bot.model,
                   temperature: bot.temperature,
                   max_tokens: bot.max_tokens,
+                  conversation_history_limit: bot.conversation_history_limit,
                 }}
               />
             </div>

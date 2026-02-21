@@ -20,14 +20,23 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceRoleClient();
 
     // Get user messages in period (exclude assistant responses to avoid double-counting)
-    const { data: messages } = await supabase
-      .from('messages')
-      .select('id, role, created_at, conversation_id')
-      .eq('role', 'user')
-      .gte('created_at', sinceISO)
-      .order('created_at', { ascending: true });
-
-    const allMessages = messages ?? [];
+    // Fetch in pages to avoid Supabase default 1000-row limit
+    const allMessages: { id: string; role: string; created_at: string; conversation_id: string }[] = [];
+    const PAGE_SIZE = 1000;
+    let offset = 0;
+    while (true) {
+      const { data: page } = await supabase
+        .from('messages')
+        .select('id, role, created_at, conversation_id')
+        .eq('role', 'user')
+        .gte('created_at', sinceISO)
+        .order('created_at', { ascending: true })
+        .range(offset, offset + PAGE_SIZE - 1);
+      const rows = page ?? [];
+      allMessages.push(...rows);
+      if (rows.length < PAGE_SIZE) break;
+      offset += PAGE_SIZE;
+    }
 
     // Daily message counts
     const dailyCounts: Record<string, number> = {};
@@ -43,16 +52,21 @@ export async function GET(request: NextRequest) {
     const dailyMessages = Object.entries(dailyCounts).map(([date, count]) => ({ date, count }));
 
     // Get conversations to map to bot owners
+    // Batch .in() queries to avoid PostgREST URL length limits
     const convIds = [...new Set(allMessages.map((m) => m.conversation_id))];
-    const { data: conversations } = convIds.length > 0
-      ? await supabase
-          .from('conversations')
-          .select('id, bot_id, channel')
-          .in('id', convIds)
-      : { data: [] };
+    const BATCH_SIZE = 300;
+    const allConversations: { id: string; bot_id: string; channel: string }[] = [];
+    for (let i = 0; i < convIds.length; i += BATCH_SIZE) {
+      const batch = convIds.slice(i, i + BATCH_SIZE);
+      const { data } = await supabase
+        .from('conversations')
+        .select('id, bot_id, channel')
+        .in('id', batch);
+      if (data) allConversations.push(...data);
+    }
 
     const convMap: Record<string, { bot_id: string; channel: string }> = {};
-    for (const c of conversations ?? []) {
+    for (const c of allConversations) {
       convMap[c.id] = { bot_id: c.bot_id, channel: c.channel };
     }
 

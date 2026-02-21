@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     if (!convId) {
       const { data: conv } = await supabase
         .from('conversations')
-        .insert({ bot_id, language: detectedLang })
+        .insert({ bot_id, language: detectedLang, channel: 'web' })
         .select('id')
         .single();
       convId = conv?.id;
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
         // Conversation doesn't belong to this bot — create a new one
         const { data: conv } = await supabase
           .from('conversations')
-          .insert({ bot_id, language: detectedLang })
+          .insert({ bot_id, language: detectedLang, channel: 'web' })
           .select('id')
           .single();
         convId = conv?.id;

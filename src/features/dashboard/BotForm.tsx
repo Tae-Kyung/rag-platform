@@ -7,6 +7,7 @@ interface BotFormData {
   name: string;
   description: string;
   system_prompt: string;
+  suggested_questions: string[];
   model: string;
   temperature: number;
   max_tokens: number;
@@ -35,6 +36,7 @@ interface EnhanceResult {
     pairsAnalyzed: number;
     failedCount: number;
   };
+  suggested_questions?: string[];
 }
 
 const MODEL_OPTIONS = [
@@ -61,6 +63,7 @@ export function BotForm({ mode, botId, initialData }: BotFormProps) {
     name: initialData?.name || '',
     description: initialData?.description || '',
     system_prompt: initialData?.system_prompt || '',
+    suggested_questions: (initialData?.suggested_questions as unknown as string[]) || [],
     model: initialData?.model || 'gpt-4o-mini',
     temperature: initialData?.temperature ?? 0.3,
     max_tokens: initialData?.max_tokens ?? 1000,
@@ -119,6 +122,9 @@ export function BotForm({ mode, botId, initialData }: BotFormProps) {
   function handleApplyEnhancedPrompt() {
     if (enhancedPrompt) {
       updateField('system_prompt', enhancedPrompt.enhanced_prompt);
+      if (enhancedPrompt.suggested_questions && enhancedPrompt.suggested_questions.length > 0) {
+        updateField('suggested_questions', enhancedPrompt.suggested_questions.slice(0, 5));
+      }
       setShowEnhanceModal(false);
       setEnhancedPrompt(null);
     }
@@ -296,6 +302,52 @@ export function BotForm({ mode, botId, initialData }: BotFormProps) {
           </p>
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            추천 질문
+          </label>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
+            채팅 시작 시 사용자에게 보여줄 추천 질문 (최대 5개)
+          </p>
+          <div className="space-y-2">
+            {form.suggested_questions.map((q, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  maxLength={200}
+                  value={q}
+                  onChange={(e) => {
+                    const updated = [...form.suggested_questions];
+                    updated[idx] = e.target.value;
+                    updateField('suggested_questions', updated);
+                  }}
+                  className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder={`추천 질문 ${idx + 1}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const updated = form.suggested_questions.filter((_, i) => i !== idx);
+                    updateField('suggested_questions', updated);
+                  }}
+                  className="shrink-0 rounded-lg border border-gray-300 dark:border-gray-600 px-2.5 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30"
+                >
+                  삭제
+                </button>
+              </div>
+            ))}
+          </div>
+          {form.suggested_questions.length < 5 && (
+            <button
+              type="button"
+              onClick={() => updateField('suggested_questions', [...form.suggested_questions, ''])}
+              className="mt-2 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400 hover:border-blue-400 hover:text-blue-500 dark:hover:border-blue-500 dark:hover:text-blue-400"
+            >
+              + 질문 추가
+            </button>
+          )}
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Model</label>
@@ -442,6 +494,23 @@ export function BotForm({ mode, botId, initialData }: BotFormProps) {
                   <p className="text-xs text-gray-600 dark:text-gray-400">
                     {enhancedPrompt.analysis.toneRecommendation}
                   </p>
+                </div>
+              )}
+
+              {/* Suggested Questions */}
+              {enhancedPrompt.suggested_questions && enhancedPrompt.suggested_questions.length > 0 && (
+                <div className="rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/30 p-4">
+                  <h3 className="text-sm font-medium text-green-800 dark:text-green-300 mb-2">
+                    추천 질문 (자동 생성)
+                  </h3>
+                  <ul className="space-y-1">
+                    {enhancedPrompt.suggested_questions.map((q, i) => (
+                      <li key={i} className="text-xs text-green-700 dark:text-green-200 flex items-start gap-1.5">
+                        <span className="mt-0.5 shrink-0 text-green-500">{i + 1}.</span>
+                        <span>{q}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
 

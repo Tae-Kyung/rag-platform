@@ -6,7 +6,7 @@ import { deduplicateSources } from '@/lib/chat/sources';
 import { buildChatMessages } from '@/lib/chat/history';
 import { v4 as uuidv4 } from 'uuid';
 import type { TelegramMessage } from './types';
-import { sendMessage, sendChatAction } from './api';
+import { sendMessage, sendChatAction, sendMessageWithKeyboard, answerCallbackQuery } from './api';
 
 interface BotInfo {
   botId: string;
@@ -17,6 +17,7 @@ interface BotInfo {
   temperature: number;
   maxTokens: number;
   conversationHistoryLimit: number;
+  suggestedQuestions: string[];
 }
 
 const FALLBACK_MESSAGES: Record<string, string> = {
@@ -116,44 +117,59 @@ async function setLanguage(
     .eq('bot_id', botInfo.botId);
 }
 
+interface CommandResult {
+  text: string;
+  suggestedQuestions?: string[];
+}
+
 async function handleCommand(
   command: string,
   args: string,
   message: TelegramMessage,
   botInfo: BotInfo
-): Promise<string> {
+): Promise<CommandResult> {
   switch (command) {
     case '/start': {
       await getOrCreateChatMapping(message.chat.id, botInfo);
-      return `Hello! I'm ${botInfo.name} AI assistant.\n\nPlease type your question and I'll help you.\n\nCommands:\n/help - Help\n/lang en - Change language (en, ko)\n/new - Start new conversation`;
+      return {
+        text: `Hello! I'm ${botInfo.name} AI assistant.\n\nPlease type your question and I'll help you.\n\nCommands:\n/help - Help\n/lang en - Change language (en, ko)\n/new - Start new conversation`,
+        suggestedQuestions: botInfo.suggestedQuestions.length > 0 ? botInfo.suggestedQuestions : undefined,
+      };
     }
 
     case '/help': {
-      return `${botInfo.name} AI Assistant\n\nCommands:\n/help - Show this help\n/lang [code] - Change language (en, ko)\n/new - Start new conversation`;
+      return {
+        text: `${botInfo.name} AI Assistant\n\nCommands:\n/help - Show this help\n/lang [code] - Change language (en, ko)\n/new - Start new conversation`,
+      };
     }
 
     case '/lang': {
       const lang = args.trim().toLowerCase();
       if (!lang) {
-        return 'Usage: /lang [en|ko]\n\nen=English, ko=한국어';
+        return { text: 'Usage: /lang [en|ko]\n\nen=English, ko=한국어' };
       }
       if (!['en', 'ko'].includes(lang)) {
-        return `Unsupported language: ${lang}\nSupported: en, ko`;
+        return { text: `Unsupported language: ${lang}\nSupported: en, ko` };
       }
       await setLanguage(message.chat.id, botInfo, lang);
-      return lang === 'ko' ? '언어가 한국어로 설정되었습니다.' : 'Language set to English.';
+      return {
+        text: lang === 'ko' ? '언어가 한국어로 설정되었습니다.' : 'Language set to English.',
+      };
     }
 
     case '/new': {
       await resetConversation(message.chat.id, botInfo);
       const mapping = await getOrCreateChatMapping(message.chat.id, botInfo);
-      return mapping.language === 'ko'
-        ? '새 대화가 시작되었습니다. 질문을 입력해 주세요.'
-        : 'New conversation started. Please type your question.';
+      return {
+        text: mapping.language === 'ko'
+          ? '새 대화가 시작되었습니다. 질문을 입력해 주세요.'
+          : 'New conversation started. Please type your question.',
+        suggestedQuestions: botInfo.suggestedQuestions.length > 0 ? botInfo.suggestedQuestions : undefined,
+      };
     }
 
     default:
-      return 'Unknown command. Type /help for available commands.';
+      return { text: 'Unknown command. Type /help for available commands.' };
   }
 }
 
@@ -177,8 +193,12 @@ export async function handleTelegramMessage(
     const spaceIdx = text.indexOf(' ');
     const command = spaceIdx === -1 ? text : text.slice(0, spaceIdx);
     const args = spaceIdx === -1 ? '' : text.slice(spaceIdx + 1);
-    const response = await handleCommand(command, args, message, botInfo);
-    await sendMessage(botInfo.token, chatId, response);
+    const result = await handleCommand(command, args, message, botInfo);
+    if (result.suggestedQuestions && result.suggestedQuestions.length > 0) {
+      await sendMessageWithKeyboard(botInfo.token, chatId, result.text, result.suggestedQuestions);
+    } else {
+      await sendMessage(botInfo.token, chatId, result.text);
+    }
     return;
   }
 
@@ -199,6 +219,106 @@ export async function handleTelegramMessage(
 
   // RAG: Search for relevant documents
   const searchResults = await searchDocuments(text, botInfo.botId, { language });
+
+  // Assess confidence
+  const confidence = assessConfidence(searchResults);
+
+  // Build system prompt with context
+  const systemPrompt = buildSystemPrompt(
+    botInfo.name,
+    botInfo.systemPrompt,
+    language,
+    searchResults
+  );
+
+  // Get conversation history
+  const chatMessages = await buildChatMessages(supabase, conversationId, systemPrompt, botInfo.conversationHistoryLimit);
+
+  // Non-streaming OpenAI call
+  const openai = getOpenAI();
+  const completion = await openai.chat.completions.create({
+    model: botInfo.model,
+    messages: chatMessages,
+    stream: false,
+    max_tokens: botInfo.maxTokens,
+    temperature: botInfo.temperature,
+  });
+
+  let responseText = completion.choices[0]?.message?.content || '';
+
+  // Strip any followups marker or LLM-generated sources block
+  responseText = responseText.replace(/\s*<!--followups:\[[\s\S]*?\]-->\s*$/, '').trimEnd();
+  responseText = responseText.replace(/\s*📚\s*Sources?:[\s\S]*$/, '').trimEnd();
+
+  // If confidence is low and no results, append fallback
+  if (confidence.level === 'low' && searchResults.length === 0) {
+    responseText += '\n\n---\n\n' + (FALLBACK_MESSAGES[language] || FALLBACK_MESSAGES['en']);
+  }
+
+  // Append sources inline
+  const dbSources = deduplicateSources(searchResults);
+  if (dbSources.length > 0) {
+    const sourcesList = dbSources
+      .slice(0, 3)
+      .map((s, i) => `${i + 1}. ${s.title} (${Math.round(s.similarity * 100)}%)`)
+      .join('\n');
+    responseText += `\n\n📚 Sources:\n${sourcesList}`;
+  }
+
+  // Save assistant message
+  const assistantMsgId = uuidv4();
+  await supabase.from('messages').insert({
+    id: assistantMsgId,
+    conversation_id: conversationId,
+    role: 'assistant',
+    content: responseText,
+    sources: dbSources.length > 0 ? dbSources : null,
+  });
+
+  // Send response via Telegram
+  await sendMessage(botInfo.token, chatId, responseText);
+}
+
+/**
+ * Handle a Telegram callback query (inline keyboard button press).
+ * Used for suggested question buttons (callback_data: "sq:N").
+ */
+export async function handleCallbackQuery(
+  callbackQueryId: string,
+  chatId: number,
+  data: string,
+  botInfo: BotInfo
+): Promise<void> {
+  // Acknowledge the callback immediately
+  await answerCallbackQuery(botInfo.token, callbackQueryId);
+
+  // Parse suggested question index
+  if (!data.startsWith('sq:')) return;
+  const idx = parseInt(data.slice(3), 10);
+  if (isNaN(idx) || idx < 0 || idx >= botInfo.suggestedQuestions.length) return;
+
+  const questionText = botInfo.suggestedQuestions[idx];
+
+  // Send typing indicator
+  await sendChatAction(botInfo.token, chatId);
+
+  // Get or create chat mapping
+  const mapping = await getOrCreateChatMapping(chatId, botInfo);
+  const { conversationId, language } = mapping;
+
+  const supabase = createServiceRoleClient();
+
+  // Save user message
+  const userMsgId = uuidv4();
+  await supabase.from('messages').insert({
+    id: userMsgId,
+    conversation_id: conversationId,
+    role: 'user',
+    content: questionText,
+  });
+
+  // RAG: Search for relevant documents
+  const searchResults = await searchDocuments(questionText, botInfo.botId, { language });
 
   // Assess confidence
   const confidence = assessConfidence(searchResults);

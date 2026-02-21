@@ -197,7 +197,8 @@ Respond in JSON format:
     "topTopics": ["topic1", "topic2", ...],
     "knowledgeGaps": ["gap1", "gap2", ...],
     "toneRecommendation": "Brief recommendation about tone/style"
-  }
+  },
+  "suggested_questions": ["자주 묻는 질문1", "자주 묻는 질문2", ...]
 }
 
 Important:
@@ -205,6 +206,7 @@ Important:
 - Keep the enhanced prompt concise but comprehensive (under 2000 characters)
 - Preserve any existing good instructions from the current prompt
 - Add specific guidance based on common question patterns
+- Generate 3-5 natural FAQ questions in Korean based on Q&A patterns. Write as actual questions users would ask (e.g. "배송은 얼마나 걸리나요?")
 - Output valid JSON only`;
 
     const openai = getOpenAI();
@@ -225,6 +227,7 @@ Important:
         knowledgeGaps: string[];
         toneRecommendation: string;
       };
+      suggested_questions?: string[];
     };
 
     try {
@@ -244,6 +247,9 @@ Important:
         pairsAnalyzed: qaPairs.length,
         failedCount: failedPairs.length,
       },
+      suggested_questions: Array.isArray(result.suggested_questions)
+        ? result.suggested_questions.slice(0, 5)
+        : [],
     });
   } catch (err) {
     if (err instanceof AuthError) {

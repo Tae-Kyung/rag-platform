@@ -211,6 +211,7 @@ export type Database = {
           name: string;
           description: string | null;
           system_prompt: string | null;
+          suggested_questions: Json;
           model: string;
           temperature: number;
           max_tokens: number;
@@ -227,6 +228,7 @@ export type Database = {
           name: string;
           description?: string | null;
           system_prompt?: string | null;
+          suggested_questions?: Json;
           model?: string;
           temperature?: number;
           max_tokens?: number;
@@ -243,6 +245,7 @@ export type Database = {
           name?: string;
           description?: string | null;
           system_prompt?: string | null;
+          suggested_questions?: Json;
           model?: string;
           temperature?: number;
           max_tokens?: number;

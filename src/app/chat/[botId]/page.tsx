@@ -9,6 +9,7 @@ import { ChatMessage } from '@/features/chat/ChatMessage';
 import { ChatInput } from '@/features/chat/ChatInput';
 import { TypingIndicator } from '@/components/TypingIndicator';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { SuggestedQuestions } from '@/features/chat/SuggestedQuestions';
 import { useStreamChat } from '@/hooks/useStreamChat';
 import type { WidgetConfig } from '@/types';
 
@@ -16,6 +17,7 @@ interface BotInfo {
   id: string;
   name: string;
   description: string | null;
+  suggested_questions: string[];
   widget_config: WidgetConfig;
   is_active: boolean;
 }
@@ -25,6 +27,7 @@ export default function ChatPage() {
   const botId = params.botId as string;
   const [bot, setBot] = useState<BotInfo | null>(null);
   const [pageLoading, setPageLoading] = useState(true);
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -51,13 +54,14 @@ export default function ChatPage() {
       const supabase = createClient();
       const { data } = await supabase
         .from('bots')
-        .select('id, name, description, widget_config, is_active')
+        .select('id, name, description, suggested_questions, widget_config, is_active')
         .eq('id', botId)
         .single();
 
       if (data) {
         const widgetConfig = (data.widget_config || {}) as WidgetConfig;
-        setBot({ ...data, widget_config: widgetConfig });
+        const suggestedQuestions = (Array.isArray(data.suggested_questions) ? data.suggested_questions : []) as string[];
+        setBot({ ...data, widget_config: widgetConfig, suggested_questions: suggestedQuestions });
         // Apply theme color
         const color = widgetConfig.primaryColor || '#0066CC';
         document.documentElement.style.setProperty('--color-primary', color);
@@ -93,6 +97,7 @@ export default function ChatPage() {
 
   const handleNewChat = () => {
     resetChat();
+    setShowSuggestions(true);
     if (bot) {
       const greeting = bot.widget_config?.greeting
         || (language === 'ko'
@@ -100,6 +105,11 @@ export default function ChatPage() {
           : `Welcome to ${bot.name}! How can I help you?`);
       addMessage('assistant', greeting);
     }
+  };
+
+  const handleSendMessage = (msg: string) => {
+    setShowSuggestions(false);
+    sendMessage(msg);
   };
 
   const primaryColor = bot?.widget_config?.primaryColor || '#0066CC';
@@ -152,8 +162,15 @@ export default function ChatPage() {
         <div ref={messagesEndRef} />
       </div>
 
+      {showSuggestions && bot.suggested_questions.length > 0 && messages.length <= 1 && (
+        <SuggestedQuestions
+          questions={bot.suggested_questions}
+          onSelect={handleSendMessage}
+        />
+      )}
+
       <ChatInput
-        onSend={sendMessage}
+        onSend={handleSendMessage}
         disabled={isLoading}
         primaryColor={primaryColor}
         placeholder={bot.widget_config?.placeholder || undefined}

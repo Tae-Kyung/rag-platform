@@ -12,6 +12,7 @@ const updateBotSchema = z.object({
   temperature: z.number().min(0).max(2).optional(),
   max_tokens: z.number().min(100).max(4000).optional(),
   conversation_history_limit: z.number().min(1).max(50).optional(),
+  suggested_questions: z.array(z.string().min(1).max(200)).max(5).optional(),
   is_active: z.boolean().optional(),
   rag_config: z
     .object({
@@ -91,6 +92,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (d.temperature !== undefined) updateData.temperature = d.temperature;
     if (d.max_tokens !== undefined) updateData.max_tokens = d.max_tokens;
     if (d.conversation_history_limit !== undefined) updateData.conversation_history_limit = d.conversation_history_limit;
+    if (d.suggested_questions !== undefined) updateData.suggested_questions = d.suggested_questions;
     if (d.is_active !== undefined) updateData.is_active = d.is_active;
     if (d.rag_config !== undefined) updateData.rag_config = d.rag_config;
 

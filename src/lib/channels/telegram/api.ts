@@ -68,6 +68,47 @@ export async function sendMessage(
 }
 
 /**
+ * Send a message with inline keyboard buttons for suggested questions.
+ */
+export async function sendMessageWithKeyboard(
+  token: string,
+  chatId: number,
+  text: string,
+  questions: string[]
+): Promise<void> {
+  const inlineKeyboard = questions.map((q, i) => [
+    { text: q, callback_data: `sq:${i}` },
+  ]);
+
+  const res = await callTelegramApi(token, 'sendMessage', {
+    chat_id: chatId,
+    text,
+    parse_mode: 'Markdown',
+    reply_markup: { inline_keyboard: inlineKeyboard },
+  });
+
+  if (!res.ok) {
+    await callTelegramApi(token, 'sendMessage', {
+      chat_id: chatId,
+      text,
+      reply_markup: { inline_keyboard: inlineKeyboard },
+    });
+  }
+}
+
+/**
+ * Answer a callback query (removes loading state on button).
+ */
+export async function answerCallbackQuery(
+  token: string,
+  callbackQueryId: string
+): Promise<void> {
+  await callTelegramApi(token, 'answerCallbackQuery', {
+    callback_query_id: callbackQueryId,
+  });
+}
+
+/**
  * Send a typing indicator.
  */
 export async function sendChatAction(

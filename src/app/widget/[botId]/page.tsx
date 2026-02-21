@@ -8,12 +8,14 @@ import { ChatMessage } from '@/features/chat/ChatMessage';
 import { ChatInput } from '@/features/chat/ChatInput';
 import { TypingIndicator } from '@/components/TypingIndicator';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { SuggestedQuestions } from '@/features/chat/SuggestedQuestions';
 import { useStreamChat } from '@/hooks/useStreamChat';
 import type { WidgetConfig } from '@/types';
 
 interface BotInfo {
   id: string;
   name: string;
+  suggested_questions: string[];
   widget_config: WidgetConfig;
   is_active: boolean;
 }
@@ -26,6 +28,7 @@ export default function WidgetPage() {
 
   const [bot, setBot] = useState<BotInfo | null>(null);
   const [pageLoading, setPageLoading] = useState(true);
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -55,13 +58,14 @@ export default function WidgetPage() {
       const supabase = createClient();
       const { data } = await supabase
         .from('bots')
-        .select('id, name, widget_config, is_active')
+        .select('id, name, suggested_questions, widget_config, is_active')
         .eq('id', botId)
         .single();
 
       if (data) {
         const widgetConfig = (data.widget_config || {}) as WidgetConfig;
-        setBot({ ...data, widget_config: widgetConfig });
+        const suggestedQuestions = (Array.isArray(data.suggested_questions) ? data.suggested_questions : []) as string[];
+        setBot({ ...data, widget_config: widgetConfig, suggested_questions: suggestedQuestions });
         const color = widgetConfig.primaryColor || '#0066CC';
         document.documentElement.style.setProperty('--color-primary', color);
       }
@@ -80,6 +84,11 @@ export default function WidgetPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bot]);
+
+  const handleSendMessage = (msg: string) => {
+    setShowSuggestions(false);
+    sendMessage(msg);
+  };
 
   const primaryColor = bot?.widget_config?.primaryColor || '#0066CC';
 
@@ -119,8 +128,15 @@ export default function WidgetPage() {
         {isLoading && <TypingIndicator />}
         <div ref={messagesEndRef} />
       </div>
+      {showSuggestions && bot.suggested_questions.length > 0 && messages.length <= 1 && (
+        <SuggestedQuestions
+          questions={bot.suggested_questions}
+          onSelect={handleSendMessage}
+          compact
+        />
+      )}
       <ChatInput
-        onSend={sendMessage}
+        onSend={handleSendMessage}
         disabled={isLoading}
         primaryColor={primaryColor}
         placeholder={bot.widget_config?.placeholder || undefined}

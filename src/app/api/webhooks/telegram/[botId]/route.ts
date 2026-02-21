@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
-import { handleTelegramMessage } from '@/lib/channels/telegram/handler';
+import { handleTelegramMessage, handleCallbackQuery } from '@/lib/channels/telegram/handler';
 import { sendMessage } from '@/lib/channels/telegram/api';
 import type { TelegramUpdate } from '@/lib/channels/telegram/types';
 
@@ -50,7 +50,7 @@ export async function POST(
     // Load bot settings
     const { data: bot } = await supabase
       .from('bots')
-      .select('name, system_prompt, model, temperature, max_tokens, conversation_history_limit, is_active')
+      .select('name, system_prompt, model, temperature, max_tokens, conversation_history_limit, is_active, suggested_questions')
       .eq('id', botId)
       .single();
 
@@ -60,18 +60,31 @@ export async function POST(
 
     const update: TelegramUpdate = await request.json();
 
-    if (update.message?.text) {
+    const botInfo = {
+      botId,
+      token: botToken,
+      name: bot.name,
+      systemPrompt: bot.system_prompt,
+      model: bot.model,
+      temperature: bot.temperature,
+      maxTokens: bot.max_tokens,
+      conversationHistoryLimit: bot.conversation_history_limit,
+      suggestedQuestions: (Array.isArray(bot.suggested_questions) ? bot.suggested_questions : []) as string[],
+    };
+
+    if (update.callback_query) {
       try {
-        await handleTelegramMessage(update.message, {
-          botId,
-          token: botToken,
-          name: bot.name,
-          systemPrompt: bot.system_prompt,
-          model: bot.model,
-          temperature: bot.temperature,
-          maxTokens: bot.max_tokens,
-          conversationHistoryLimit: bot.conversation_history_limit,
-        });
+        const cq = update.callback_query;
+        const chatId = cq.message?.chat.id;
+        if (chatId && cq.data) {
+          await handleCallbackQuery(cq.id, chatId, cq.data, botInfo);
+        }
+      } catch (handlerError) {
+        console.error('Telegram callback query error:', handlerError);
+      }
+    } else if (update.message?.text) {
+      try {
+        await handleTelegramMessage(update.message, botInfo);
       } catch (handlerError) {
         console.error('Telegram handler error:', handlerError);
         const errMsg = handlerError instanceof Error ? handlerError.message : String(handlerError);

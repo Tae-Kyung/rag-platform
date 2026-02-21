@@ -1,9 +1,11 @@
 import { NextRequest } from 'next/server';
 import { requireOwner, requirePlan, AuthError } from '@/lib/auth/guards';
 import { createServiceRoleClient } from '@/lib/supabase/service';
+import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import { getOpenAI } from '@/lib/openai/client';
 import { LLM_MODEL } from '@/config/constants';
+import type { PlanId } from '@/types';
 
 const REQUIRED_MESSAGE_COUNT = 100;
 const SAMPLE_CONVERSATION_COUNT = 50;
@@ -20,8 +22,32 @@ const FAILURE_PATTERNS = [
 ];
 
 /**
+ * Check if user has at least starter plan (without throwing).
+ */
+async function checkPlanEligible(): Promise<boolean> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { data: subscription } = await supabase
+      .from('subscriptions')
+      .select('plan_id, status')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!subscription || subscription.status !== 'active') return false;
+
+    const planOrder: PlanId[] = ['free', 'starter', 'pro', 'enterprise'];
+    return planOrder.indexOf(subscription.plan_id as PlanId) >= planOrder.indexOf('starter');
+  } catch {
+    return false;
+  }
+}
+
+/**
  * GET /api/owner/bots/[botId]/enhance-prompt
- * Check eligibility: does this bot have >= 100 user messages?
+ * Check eligibility: plan level + user message count >= 100.
  */
 export async function GET(
   _request: NextRequest,
@@ -30,7 +56,8 @@ export async function GET(
   try {
     const { botId } = await params;
     await requireOwner(botId);
-    await requirePlan('starter');
+
+    const planEligible = await checkPlanEligible();
 
     const supabase = createServiceRoleClient();
 
@@ -45,6 +72,7 @@ export async function GET(
     if (conversationIds.length === 0) {
       return successResponse({
         eligible: false,
+        planEligible,
         userMessageCount: 0,
         requiredCount: REQUIRED_MESSAGE_COUNT,
       });
@@ -60,7 +88,8 @@ export async function GET(
     const userMessageCount = count ?? 0;
 
     return successResponse({
-      eligible: userMessageCount >= REQUIRED_MESSAGE_COUNT,
+      eligible: planEligible && userMessageCount >= REQUIRED_MESSAGE_COUNT,
+      planEligible,
       userMessageCount,
       requiredCount: REQUIRED_MESSAGE_COUNT,
     });

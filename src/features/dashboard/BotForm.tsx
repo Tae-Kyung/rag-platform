@@ -21,6 +21,7 @@ interface BotFormProps {
 
 interface EnhanceEligibility {
   eligible: boolean;
+  planEligible: boolean;
   userMessageCount: number;
   requiredCount: number;
 }
@@ -262,7 +263,11 @@ export function BotForm({ mode, botId, initialData }: BotFormProps) {
               {generating ? 'Generating...' : 'AI로 시스템 프롬프트 생성'}
             </button>
             {mode === 'edit' && enhanceEligibility && (
-              enhanceEligibility.eligible ? (
+              !enhanceEligibility.planEligible ? (
+                <span className="text-xs text-gray-400 dark:text-gray-500">
+                  프롬프트 개선: Starter 플랜 이상 필요
+                </span>
+              ) : enhanceEligibility.eligible ? (
                 <button
                   type="button"
                   disabled={enhancing}

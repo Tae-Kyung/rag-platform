@@ -693,6 +693,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      custom_models: {
+        Row: {
+          id: string;
+          name: string;
+          model_id: string;
+          provider: string;
+          base_url: string;
+          api_key_env: string;
+          api_key_header: string;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          model_id: string;
+          provider?: string;
+          base_url: string;
+          api_key_env?: string;
+          api_key_header?: string;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          model_id?: string;
+          provider?: string;
+          base_url?: string;
+          api_key_env?: string;
+          api_key_header?: string;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

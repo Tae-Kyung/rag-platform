@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 import { searchDocuments } from '@/lib/rag/search';
 import { buildSystemPrompt, assessConfidence } from '@/lib/rag/prompts';
-import { getOpenAI } from '@/lib/openai/client';
+import { getLLMClient, isCustomModel } from '@/lib/openai/client';
 import { deduplicateSources } from '@/lib/chat/sources';
 import { buildChatMessages } from '@/lib/chat/history';
 import { checkMessageQuota, incrementMessageCount } from '@/lib/billing/usage';
@@ -150,26 +150,42 @@ export async function POST(request: NextRequest) {
 
     const confidence = assessConfidence(searchResults);
 
+    // Get LLM client for bot's model
+    const openai = await getLLMClient(bot.model);
+    const customModel = await isCustomModel(bot.model);
+    const useStream = !customModel;
+
+    // For custom models with limited context, reduce RAG results
+    let ragResults = searchResults;
+    if (customModel) {
+      const MAX_RAG_CHARS = 4000;
+      const trimmed = [];
+      let totalChars = 0;
+      for (const r of searchResults) {
+        if (totalChars + r.content.length > MAX_RAG_CHARS) {
+          const remaining = MAX_RAG_CHARS - totalChars;
+          if (remaining > 200) {
+            trimmed.push({ ...r, content: r.content.slice(0, remaining) + '...' });
+          }
+          break;
+        }
+        trimmed.push(r);
+        totalChars += r.content.length;
+      }
+      ragResults = trimmed;
+    }
+
     // Build system prompt with bot settings + RAG context
     const systemPrompt = buildSystemPrompt(
       bot.name,
       bot.system_prompt,
       detectedLang,
-      searchResults
+      ragResults
     );
 
     // Get conversation history
-    const chatMessages = await buildChatMessages(supabase, convId, systemPrompt, bot.conversation_history_limit);
-
-    // Stream response from OpenAI using bot's model settings
-    const openai = getOpenAI();
-    const stream = await openai.chat.completions.create({
-      model: bot.model || 'gpt-4o-mini',
-      messages: chatMessages,
-      stream: true,
-      max_tokens: bot.max_tokens || 1000,
-      temperature: bot.temperature || 0.3,
-    });
+    const historyLimit = customModel ? Math.min(bot.conversation_history_limit, 4) : bot.conversation_history_limit;
+    const chatMessages = await buildChatMessages(supabase, convId, systemPrompt, historyLimit);
 
     const encoder = new TextEncoder();
     let fullResponse = '';
@@ -190,16 +206,52 @@ export async function POST(request: NextRequest) {
             )
           );
 
-          for await (const chunk of stream) {
-            const content = chunk.choices[0]?.delta?.content || '';
-            if (content) {
-              fullResponse += content;
+          if (useStream) {
+            // OpenAI: streaming
+            const stream = await openai.chat.completions.create({
+              model: bot.model || 'gpt-4o-mini',
+              messages: chatMessages,
+              stream: true,
+              max_tokens: bot.max_tokens || 1000,
+              temperature: bot.temperature || 0.3,
+            });
+
+            for await (const chunk of stream) {
+              const content = chunk.choices[0]?.delta?.content || '';
+              if (content) {
+                fullResponse += content;
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ type: 'content', content })}\n\n`
+                  )
+                );
+              }
+            }
+          } else {
+            // Custom model: non-streaming, then send as SSE
+            const completion = await openai.chat.completions.create({
+              model: bot.model,
+              messages: chatMessages,
+              max_tokens: bot.max_tokens || 1000,
+              temperature: bot.temperature || 0.3,
+            });
+
+            if (!completion.choices || completion.choices.length === 0) {
               controller.enqueue(
                 encoder.encode(
-                  `data: ${JSON.stringify({ type: 'content', content })}\n\n`
+                  `data: ${JSON.stringify({ type: 'error', error: 'Model returned no response. Input may be too long.' })}\n\n`
                 )
               );
+              controller.close();
+              return;
             }
+
+            fullResponse = completion.choices[0]?.message?.content || '';
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ type: 'content', content: fullResponse })}\n\n`
+              )
+            );
           }
 
           // Send sources if available
@@ -232,10 +284,11 @@ export async function POST(request: NextRequest) {
             encoder.encode(`data: ${JSON.stringify({ type: 'done' })}\n\n`)
           );
           controller.close();
-        } catch {
+        } catch (err) {
+          const errMsg = err instanceof Error ? err.message : 'Stream error';
           controller.enqueue(
             encoder.encode(
-              `data: ${JSON.stringify({ type: 'error', error: 'Stream error' })}\n\n`
+              `data: ${JSON.stringify({ type: 'error', error: errMsg })}\n\n`
             )
           );
           controller.close();

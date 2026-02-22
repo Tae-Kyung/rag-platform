@@ -39,10 +39,16 @@ interface EnhanceResult {
   suggested_questions?: string[];
 }
 
-const MODEL_OPTIONS = [
-  { value: 'gpt-4o-mini', label: 'GPT-4o Mini (Fast & Affordable)' },
-  { value: 'gpt-4o', label: 'GPT-4o (Most Capable)' },
-  { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
+interface ModelOption {
+  value: string;
+  label: string;
+  provider: string;
+}
+
+const FALLBACK_MODELS: ModelOption[] = [
+  { value: 'gpt-4o-mini', label: 'GPT-4o Mini (Fast & Affordable)', provider: 'OpenAI' },
+  { value: 'gpt-4o', label: 'GPT-4o (Most Capable)', provider: 'OpenAI' },
+  { value: 'gpt-4-turbo', label: 'GPT-4 Turbo', provider: 'OpenAI' },
 ];
 
 export function BotForm({ mode, botId, initialData }: BotFormProps) {
@@ -52,6 +58,9 @@ export function BotForm({ mode, botId, initialData }: BotFormProps) {
   const [error, setError] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [contactPhone, setContactPhone] = useState('');
+
+  // Model options state
+  const [modelOptions, setModelOptions] = useState<ModelOption[]>(FALLBACK_MODELS);
 
   // Enhance prompt state
   const [enhancing, setEnhancing] = useState(false);
@@ -73,6 +82,22 @@ export function BotForm({ mode, botId, initialData }: BotFormProps) {
   function updateField<K extends keyof BotFormData>(key: K, value: BotFormData[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
+
+  // Fetch available models
+  useEffect(() => {
+    async function fetchModels() {
+      try {
+        const res = await fetch('/api/owner/models');
+        const json = await res.json();
+        if (json.success) {
+          setModelOptions(json.data.models);
+        }
+      } catch {
+        // Keep fallback models
+      }
+    }
+    fetchModels();
+  }, []);
 
   // Check enhance eligibility in edit mode
   useEffect(() => {
@@ -356,10 +381,19 @@ export function BotForm({ mode, botId, initialData }: BotFormProps) {
               onChange={(e) => updateField('model', e.target.value)}
               className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
-              {MODEL_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
+              {Object.entries(
+                modelOptions.reduce<Record<string, ModelOption[]>>((groups, opt) => {
+                  (groups[opt.provider] ??= []).push(opt);
+                  return groups;
+                }, {})
+              ).map(([provider, opts]) => (
+                <optgroup key={provider} label={provider}>
+                  {opts.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </div>

@@ -13,6 +13,8 @@ import { summarizeTables } from './pipeline-tables';
 
 export interface ProcessOptions {
   useVision?: boolean;
+  prefetchedText?: string;
+  prefetchedTitle?: string;
 }
 
 interface ChunkStrategy {
@@ -26,7 +28,7 @@ export async function processDocument(
   botId: string,
   options: ProcessOptions = {}
 ) {
-  const { useVision = false } = options;
+  const { useVision = false, prefetchedText, prefetchedTitle } = options;
   const supabase = createServiceRoleClient();
 
   await supabase
@@ -51,10 +53,15 @@ export async function processDocument(
     let pageTitle: string | undefined;
 
     if (doc.file_type === 'url') {
-      const url = doc.source_url || doc.file_name;
-      const crawlResult = await crawlURL(url);
-      text = crawlResult.text;
-      pageTitle = crawlResult.title;
+      if (prefetchedText) {
+        text = prefetchedText;
+        pageTitle = prefetchedTitle;
+      } else {
+        const url = doc.source_url || doc.file_name;
+        const crawlResult = await crawlURL(url);
+        text = crawlResult.text;
+        pageTitle = crawlResult.title;
+      }
     } else if (doc.storage_path) {
       console.log(`[Pipeline] Downloading from storage: ${doc.storage_path}`);
       const { data: fileData, error: downloadError } = await supabase.storage

@@ -12,7 +12,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     await requireOwner(botId);
 
     const body = await request.json();
-    const { url } = body;
+    const { url, text, title } = body;
 
     if (!url) {
       return errorResponse('URL is required');
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .from('documents')
       .insert({
         bot_id: botId,
-        file_name: url,
+        file_name: title || url,
         file_type: 'url',
         source_url: url,
         status: 'pending',
@@ -42,9 +42,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return errorResponse('Failed to create document record', 500);
     }
 
-    // Process immediately
+    // Process immediately — skip re-crawling if prefetched text is provided
     try {
-      const result = await processDocument(doc.id, botId);
+      const options = text ? { prefetchedText: text, prefetchedTitle: title } : {};
+      const result = await processDocument(doc.id, botId, options);
       return successResponse({ ...doc, ...result }, 201);
     } catch (processError) {
       // Document is already marked as failed by pipeline

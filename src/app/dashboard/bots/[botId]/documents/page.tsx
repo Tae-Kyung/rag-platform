@@ -48,6 +48,8 @@ export default function DocumentsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [crawlUrl, setCrawlUrl] = useState('');
   const [crawling, setCrawling] = useState(false);
+  const [crawlPreview, setCrawlPreview] = useState<{ url: string; title: string; text: string; wordCount: number } | null>(null);
+  const [savingCrawl, setSavingCrawl] = useState(false);
   const [pasteTitle, setPasteTitle] = useState('');
   const [pasteContent, setPasteContent] = useState('');
   const [pasting, setPasting] = useState(false);
@@ -182,7 +184,7 @@ export default function DocumentsPage() {
     if (!crawlUrl.trim()) return;
     setCrawling(true);
     try {
-      const res = await fetch(`/api/owner/bots/${botId}/documents/crawl`, {
+      const res = await fetch(`/api/owner/bots/${botId}/documents/crawl/preview`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: crawlUrl.trim() }),
@@ -191,13 +193,40 @@ export default function DocumentsPage() {
       if (!json.success) {
         alert(json.error || 'Crawl failed');
       } else {
+        setCrawlPreview(json.data);
+      }
+    } catch {
+      alert('Network error');
+    } finally {
+      setCrawling(false);
+    }
+  }
+
+  async function handleSaveCrawl() {
+    if (!crawlPreview) return;
+    setSavingCrawl(true);
+    try {
+      const res = await fetch(`/api/owner/bots/${botId}/documents/crawl`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: crawlPreview.url,
+          text: crawlPreview.text,
+          title: crawlPreview.title,
+        }),
+      });
+      const json = await res.json();
+      if (!json.success) {
+        alert(json.error || 'Failed to save');
+      } else {
+        setCrawlPreview(null);
         setCrawlUrl('');
         fetchDocuments();
       }
     } catch {
       alert('Network error');
     } finally {
-      setCrawling(false);
+      setSavingCrawl(false);
     }
   }
 
@@ -501,6 +530,62 @@ export default function DocumentsPage() {
               >
                 Delete
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Crawl Preview Modal */}
+      {crawlPreview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => !savingCrawl && setCrawlPreview(null)}>
+          <div
+            className="mx-4 w-full max-w-2xl rounded-xl bg-white dark:bg-gray-800 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Crawl Preview</h3>
+              <div className="mt-4 space-y-3">
+                <div>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Title: </span>
+                  <span className="text-sm text-gray-900 dark:text-white">{crawlPreview.title || '(No title)'}</span>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">URL: </span>
+                  <span className="text-sm text-blue-600 dark:text-blue-400 break-all">{crawlPreview.url}</span>
+                </div>
+                <div className="flex gap-4">
+                  <div>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Words: </span>
+                    <span className="text-sm text-gray-900 dark:text-white">{crawlPreview.wordCount.toLocaleString()}</span>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Characters: </span>
+                    <span className="text-sm text-gray-900 dark:text-white">{crawlPreview.text.length.toLocaleString()}</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label>
+                  <div className="max-h-80 overflow-y-auto rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-3">
+                    <pre className="whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-200 font-sans">{crawlPreview.text}</pre>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  onClick={() => setCrawlPreview(null)}
+                  disabled={savingCrawl}
+                  className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveCrawl}
+                  disabled={savingCrawl}
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {savingCrawl ? 'Saving...' : 'Save'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

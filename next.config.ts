@@ -4,7 +4,7 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ['pdfjs-dist', 'pdf-parse', '@napi-rs/canvas'],
+  serverExternalPackages: ['pdfjs-dist', 'pdf-parse', '@napi-rs/canvas', 'puppeteer-core', '@sparticuz/chromium'],
   async headers() {
     return [
       {

@@ -179,6 +179,51 @@ async function fetchWithRetry(url: string): Promise<Response> {
   return response;
 }
 
+/**
+ * Detect if crawled content looks like an unrendered SPA shell
+ */
+function isSPAShell(text: string): boolean {
+  const trimmed = text.trim();
+  if (trimmed.length > 500) return false;
+  const lower = trimmed.toLowerCase();
+  const spaIndicators = ['loading', 'please wait', 'javascript', 'noscript', 'enable javascript'];
+  return spaIndicators.some((indicator) => lower.includes(indicator)) || trimmed.length < 50;
+}
+
+/**
+ * Crawl a URL using a headless browser (for SPA / JS-rendered sites)
+ */
+async function crawlURLWithBrowser(url: string): Promise<CrawlResult> {
+  console.log(`[Parser] SPA detected, launching headless browser for: ${url}`);
+
+  const chromium = await import('@sparticuz/chromium');
+  const puppeteer = await import('puppeteer-core');
+
+  const browser = await puppeteer.default.launch({
+    args: chromium.default.args,
+    defaultViewport: { width: 1280, height: 720 },
+    executablePath: await chromium.default.executablePath(),
+    headless: true,
+  });
+
+  try {
+    const page = await browser.newPage();
+    await page.setUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+    );
+
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: CRAWL_TIMEOUT_MS });
+
+    const title = await page.title();
+    const html = await page.content();
+
+    const text = await parseHTML(html);
+    return { text, title: title || undefined };
+  } finally {
+    await browser.close();
+  }
+}
+
 export async function crawlURL(url: string): Promise<CrawlResult> {
   const response = await fetchWithRetry(url);
 
@@ -206,6 +251,17 @@ export async function crawlURL(url: string): Promise<CrawlResult> {
     $('meta[property="og:title"]').attr('content')?.trim() ||
     undefined;
   const text = await parseHTML(html);
+
+  // If content looks like an unrendered SPA, retry with headless browser
+  if (isSPAShell(text)) {
+    try {
+      return await crawlURLWithBrowser(url);
+    } catch (browserError) {
+      console.error('[Parser] Browser fallback failed:', browserError);
+      // Return whatever we got from the static fetch
+    }
+  }
+
   return { text, title };
 }
 

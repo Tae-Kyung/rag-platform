@@ -1,7 +1,7 @@
 import { getOpenAI } from '@/lib/openai/client';
 import { LLM_MODEL } from '@/config/constants';
 
-const MAX_SEGMENT = 12_000;
+const MAX_SEGMENT = 40_000;
 
 /**
  * Refine crawled web content by removing navigation noise and structuring with markdown headings.
@@ -58,7 +58,7 @@ Follow these rules strictly:
             content: `Clean the following web page content for a knowledge base:\n\n${text}`,
           },
         ],
-        max_tokens: 8000,
+        max_tokens: 16000,
         temperature: 0,
       },
       { timeout: 45_000 },

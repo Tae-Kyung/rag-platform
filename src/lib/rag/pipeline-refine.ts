@@ -31,11 +31,8 @@ export async function refineWebContent(text: string): Promise<string> {
     remaining = remaining.substring(splitAt).trimStart();
   }
 
-  console.log(`[Pipeline] Refining ${segments.length} segments with AI`);
-  const results: string[] = [];
-  for (const segment of segments) {
-    results.push(await refineSegment(segment));
-  }
+  console.log(`[Pipeline] Refining ${segments.length} segments with AI (parallel)`);
+  const results = await Promise.all(segments.map((segment) => refineSegment(segment)));
   return results.join('\n\n');
 }
 

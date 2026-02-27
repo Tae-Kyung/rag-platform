@@ -50,6 +50,8 @@ export default function DocumentsPage() {
   const [crawling, setCrawling] = useState(false);
   const [crawlPreview, setCrawlPreview] = useState<{ url: string; title: string; text: string; wordCount: number } | null>(null);
   const [savingCrawl, setSavingCrawl] = useState(false);
+  const [refining, setRefining] = useState(false);
+  const [isRefined, setIsRefined] = useState(false);
   const [pasteTitle, setPasteTitle] = useState('');
   const [pasteContent, setPasteContent] = useState('');
   const [pasting, setPasting] = useState(false);
@@ -194,11 +196,39 @@ export default function DocumentsPage() {
         alert(json.error || 'Crawl failed');
       } else {
         setCrawlPreview(json.data);
+        setIsRefined(false);
       }
     } catch {
       alert('Network error');
     } finally {
       setCrawling(false);
+    }
+  }
+
+  async function handleRefine() {
+    if (!crawlPreview) return;
+    setRefining(true);
+    try {
+      const res = await fetch(`/api/owner/bots/${botId}/documents/crawl/refine`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: crawlPreview.text }),
+      });
+      const json = await res.json();
+      if (!json.success) {
+        alert(json.error || 'Refine failed');
+      } else {
+        setCrawlPreview({
+          ...crawlPreview,
+          text: json.data.text,
+          wordCount: json.data.wordCount,
+        });
+        setIsRefined(true);
+      }
+    } catch {
+      alert('Network error');
+    } finally {
+      setRefining(false);
     }
   }
 
@@ -537,13 +567,20 @@ export default function DocumentsPage() {
 
       {/* Crawl Preview Modal */}
       {crawlPreview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => !savingCrawl && setCrawlPreview(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => !savingCrawl && !refining && setCrawlPreview(null)}>
           <div
             className="mx-4 w-full max-w-2xl rounded-xl bg-white dark:bg-gray-800 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Crawl Preview</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Crawl Preview</h3>
+                {isRefined && (
+                  <span className="inline-flex items-center rounded-full bg-green-100 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">
+                    AI Refined
+                  </span>
+                )}
+              </div>
               <div className="mt-4 space-y-3">
                 <div>
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Title: </span>
@@ -573,14 +610,26 @@ export default function DocumentsPage() {
               <div className="mt-6 flex justify-end gap-3">
                 <button
                   onClick={() => setCrawlPreview(null)}
-                  disabled={savingCrawl}
-                  className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  disabled={savingCrawl || refining}
+                  className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
+                  onClick={handleRefine}
+                  disabled={refining || isRefined}
+                  className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+                >
+                  {refining ? (
+                    <span className="flex items-center gap-2">
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      Refining...
+                    </span>
+                  ) : isRefined ? 'AI Refined' : 'AI Refine'}
+                </button>
+                <button
                   onClick={handleSaveCrawl}
-                  disabled={savingCrawl}
+                  disabled={savingCrawl || refining}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                 >
                   {savingCrawl ? 'Saving...' : 'Save'}

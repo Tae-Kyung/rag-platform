@@ -44,6 +44,7 @@ export const EXCERPT_CONTEXT_CHARS = 80;
 // --- Crawl ---
 
 export const CRAWL_TIMEOUT_MS = 15_000;
+export const AI_REFINE_MAX_INPUT = 100_000;
 
 // --- Admin ---
 

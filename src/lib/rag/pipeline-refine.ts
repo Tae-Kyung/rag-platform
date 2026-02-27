@@ -39,27 +39,30 @@ export async function refineWebContent(text: string): Promise<string> {
 async function refineSegment(text: string): Promise<string> {
   try {
     const openai = getOpenAI();
-    const response = await openai.chat.completions.create({
-      model: LLM_MODEL,
-      messages: [
-        {
-          role: 'system',
-          content: `You are an expert at cleaning web page content for use in a knowledge base.
+    const response = await openai.chat.completions.create(
+      {
+        model: LLM_MODEL,
+        messages: [
+          {
+            role: 'system',
+            content: `You are an expert at cleaning web page content for use in a knowledge base.
 Follow these rules strictly:
 1. Remove web noise: navigation menus, headers/footers, cookie banners, ads, sidebar widgets, social media links, breadcrumbs, and other non-content elements.
 2. Structure the remaining content with markdown headings (##, ###) to organize it semantically.
 3. Preserve ALL factual information exactly as-is. Never summarize, paraphrase, or omit any substantive content.
 4. Keep lists, tables, code blocks, and other structured content intact.
 5. Output only the cleaned content without additional explanation or comments.`,
-        },
-        {
-          role: 'user',
-          content: `Clean the following web page content for a knowledge base:\n\n${text}`,
-        },
-      ],
-      max_tokens: 8000,
-      temperature: 0,
-    });
+          },
+          {
+            role: 'user',
+            content: `Clean the following web page content for a knowledge base:\n\n${text}`,
+          },
+        ],
+        max_tokens: 8000,
+        temperature: 0,
+      },
+      { timeout: 45_000 },
+    );
     return response.choices[0].message.content || text;
   } catch (error) {
     console.error('[Pipeline] AI refine failed, using raw text:', error);

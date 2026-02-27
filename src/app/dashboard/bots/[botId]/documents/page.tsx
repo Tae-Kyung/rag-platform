@@ -214,6 +214,11 @@ export default function DocumentsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: crawlPreview.text }),
       });
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        alert(`Refine failed (${res.status}): ${text.slice(0, 200) || res.statusText}`);
+        return;
+      }
       const json = await res.json();
       if (!json.success) {
         alert(json.error || 'Refine failed');
